@@ -29,22 +29,25 @@ function DrawGrid(Dots, Grid_Lat_Length, Grid_Long_Length, DeltaLat, DeltaLong, 
 
     // заполняем сетку значениями в шахматном порядке (т.к. для алгоритма MarchingSquares нужны только угловые и центральное значения)
     for (let i = 0; i < Grid_Lat_Length; i++) {
-        start = i % 2 === 0 ? 0 : 1;
-        for (let j = start; j < Grid_Long_Length; j += 2) {
+        /* start = i % 2 === 0 ? 0 : 1; */
+        for (let j = /* start */0; j < Grid_Long_Length; j++) {
             if (Grid[i][j] == null) {
                 // считаем среднее взвешанное от всех изначальных ячеек (в качестве веса обратное значение квадрата расстояния (1/r^2))
                 for (let k = 0; k < Cells.length; k++) {
-                    up += Cells[k][2] * (1 / Math.pow(((i - Cells[k][0]) * (i - Cells[k][0]) + (j - Cells[k][1]) * (j - Cells[k][1])), 2));
-                    down += 1 / Math.pow(((i - Cells[k][0]) * (i - Cells[k][0]) + (j - Cells[k][1]) * (j - Cells[k][1])), 2);
-
+                    up += Cells[k][2] * (1 / Math.pow(((i - Cells[k][0]) ** 2 + (j - Cells[k][1]) ** 2), 2));
+                    down += 1 / Math.pow(((i - Cells[k][0]) ** 2 + (j - Cells[k][1]) ** 2), 2);
                 }
                 // добавляем в ячейку значение, зануляем числитель и знаминатель
                 Grid[i][j] = up / down;
                 up = 0;
                 down = 0;
+
             }
+            
         }
     }
+
+
 
     return Grid;
 }

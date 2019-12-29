@@ -18,4 +18,6 @@ function getDelta(D1, D2, L, LongOrLat) {
     return d * L / Distance;
 }
 
+
+
 export { getDelta }

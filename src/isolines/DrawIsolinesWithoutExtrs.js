@@ -1,4 +1,4 @@
-import { DrawGridWithoutExtrs } from '../grid/DrawGridWithoutExtrs';
+import { DrawGridWithoutExtrs } from '../interpolate/DrawGridWithoutExtrs';
 import { drawIsolines } from './drawIsolines';
 
 function DrawIsolinesWithoutExtrs(Dots, Step, Detalization, Percent_size) {

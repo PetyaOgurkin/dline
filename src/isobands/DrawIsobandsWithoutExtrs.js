@@ -1,4 +1,4 @@
-import { DrawGridWithoutExtrs } from '../grid/DrawGridWithoutExtrs';
+import { DrawGridWithoutExtrs } from '../interpolate/DrawGridWithoutExtrs';
 import { drawIsobands } from './drawIsobands';
 
 function DrawIsobandsWithoutExtrs(Dots, Step, Detalization, Percent_size) {

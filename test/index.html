@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+
+    <script defer src='https://npmcdn.com/@turf/turf/turf.min.js'></script>
+    <script defer src="../node_modules/leaflet/dist/leaflet.js"></script>
+    <script defer src="https://cdn.rawgit.com/gokertanrisever/leaflet-ruler/master/src/leaflet-ruler.js"></script>
+    <script defer src="../dist/dline.js"></script>
+    <script defer src="index.js"></script>
+
+    <link rel="stylesheet" href="../node_modules/leaflet/dist/leaflet.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/gokertanrisever/leaflet-ruler/master/src/leaflet-ruler.css">
+    
+
+    <style>
+        .map {
+            width: 1280px;
+            height: 700px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="map" class="map"></div>
+    <button onclick="drawTurf()">turf</button>
+    <button onclick="drawDline()">dline</button>
+</body>
+
+</html>

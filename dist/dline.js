@@ -42,17 +42,16 @@
       var up = 0;
       var down = 0; // переменная для первой ячейки строки (0 или 1, т.к. заполняется в шахматном порядке)
 
-      var start; // заполняем сетку значениями в шахматном порядке (т.к. для алгоритма MarchingSquares нужны только угловые и центральное значения)
-
       for (var _i2 = 0; _i2 < Grid_Lat_Length; _i2++) {
-        start = _i2 % 2 === 0 ? 0 : 1;
-
-        for (var j = start; j < Grid_Long_Length; j += 2) {
+        /* start = i % 2 === 0 ? 0 : 1; */
+        for (var j =
+        /* start */
+        0; j < Grid_Long_Length; j++) {
           if (Grid[_i2][j] == null) {
             // считаем среднее взвешанное от всех изначальных ячеек (в качестве веса обратное значение квадрата расстояния (1/r^2))
             for (var k = 0; k < Cells.length; k++) {
-              up += Cells[k][2] * (1 / Math.pow((_i2 - Cells[k][0]) * (_i2 - Cells[k][0]) + (j - Cells[k][1]) * (j - Cells[k][1]), 2));
-              down += 1 / Math.pow((_i2 - Cells[k][0]) * (_i2 - Cells[k][0]) + (j - Cells[k][1]) * (j - Cells[k][1]), 2);
+              up += Cells[k][2] * (1 / Math.pow(Math.pow(_i2 - Cells[k][0], 2) + Math.pow(j - Cells[k][1], 2), 2));
+              down += 1 / Math.pow(Math.pow(_i2 - Cells[k][0], 2) + Math.pow(j - Cells[k][1], 2), 2);
             } // добавляем в ячейку значение, зануляем числитель и знаминатель
 
 
@@ -66,7 +65,7 @@
       return Grid;
     }
 
-    function DrawGridWithExtrs(Dots, SW, NE, Detalization) {
+    function DrawGridWithExtrs(Dots, bbox, Detalization) {
       var Dot_Min_Z = Math.min.apply(null, Dots.map(function (Dot) {
         return Dot[2];
       }));
@@ -74,21 +73,21 @@
         return Dot[2];
       })); // расстояние между границами сетки в координатах
 
-      var Grid_Long = NE.Long - SW.Long;
-      var Grid_Lat = NE.Lat - SW.Lat; // шаг
+      var Grid_Long = bbox[2] - bbox[0];
+      var Grid_Lat = bbox[3] - bbox[1]; // шаг
 
-      var DeltaLong = getDelta([SW.Lat, SW.Long], [SW.Lat, NE.Long], Detalization, "Long");
-      var DeltaLat = getDelta([SW.Lat, SW.Long], [NE.Lat, SW.Long], Detalization, "Lat"); // колличество ячеек сетки
+      var DeltaLong = getDelta([bbox[1], bbox[0]], [bbox[1], bbox[2]], Detalization, "Long");
+      var DeltaLat = getDelta([bbox[1], bbox[0]], [bbox[3], bbox[0]], Detalization, "Lat"); // колличество ячеек сетки
 
       var Grid_Long_Length = Math.ceil(Grid_Long / DeltaLong);
       var Grid_Lat_Length = Math.ceil(Grid_Lat / DeltaLat);
-      var Grid = DrawGrid(Dots, Grid_Lat_Length, Grid_Long_Length, DeltaLat, DeltaLong, SW.Lat, SW.Long);
+      var Grid = DrawGrid(Dots, Grid_Lat_Length, Grid_Long_Length, DeltaLat, DeltaLong, bbox[1], bbox[0]);
       return {
         "Grid": Grid,
         "DeltaLat": DeltaLat,
         "DeltaLong": DeltaLong,
-        "Grid_Min_Lat": SW.Lat,
-        "Grid_Min_Long": SW.Long,
+        "Grid_Min_Lat": bbox[1],
+        "Grid_Min_Long": bbox[0],
         "Dot_Max_Z": Dot_Max_Z,
         "Dot_Min_Z": Dot_Min_Z
       };
@@ -827,8 +826,8 @@
       return GeoJson;
     }
 
-    function DrawIsobandsWithExtrs(Dots, Step, Detalization, Extrs) {
-      var Grid = DrawGridWithExtrs(Dots, Extrs.SW, Extrs.NE, Detalization);
+    function DrawIsobandsWithExtrs(Dots, Step, Detalization, bbox) {
+      var Grid = DrawGridWithExtrs(Dots, bbox, Detalization);
       return drawIsobands(Grid.Grid, Step, Grid.DeltaLat, Grid.DeltaLong, Grid.Grid_Min_Lat, Grid.Grid_Min_Long, Grid.Dot_Max_Z, Grid.Dot_Min_Z);
     }
 
@@ -1023,8 +1022,8 @@
       return GeoJson;
     }
 
-    function DrawIsolinesWithExtrs(Dots, Step, Detalization, Extrs) {
-      var Grid = DrawGridWithExtrs(Dots, Extrs.SW, Extrs.NE, Detalization);
+    function DrawIsolinesWithExtrs(Dots, Step, Detalization, bbox) {
+      var Grid = DrawGridWithExtrs(Dots, bbox, Detalization);
       return drawIsolines(Grid.Grid, Step, Grid.DeltaLat, Grid.DeltaLong, Grid.Grid_Min_Lat, Grid.Grid_Min_Long, Grid.Dot_Max_Z, Grid.Dot_Min_Z);
     }
 
@@ -1037,11 +1036,106 @@
       return drawIsolines(Grid, Step, Delta, Delta, minLat, minLong, maxZ, minZ);
     }
 
+    function DrawIsobandsWithCustomGrid(Grid, Step, DeltaLat, DeltaLong, minLat, minLong, minZ, maxZ) {
+      return drawIsobands(Grid, Step, DeltaLat, DeltaLong, minLat, minLong, maxZ, minZ);
+    }
+
+    function distance(D1, D2) {
+      var EARTH_RADIUS = 6372795;
+
+      var toRadians = function toRadians(point) {
+        return point.map(function (c) {
+          return c * Math.PI / 180;
+        });
+      };
+
+      var A = toRadians(D1);
+      var B = toRadians(D2);
+      return EARTH_RADIUS * Math.acos(Math.sin(A[0]) * Math.sin(B[0]) + Math.cos(A[0]) * Math.cos(B[0]) * Math.cos(A[1] - B[1]));
+    }
+
+    function cellSizes(bbox, cellSize) {
+      var odd = function odd(value) {
+        var ceil = Math.ceil(value);
+        return !(ceil % 2) ? Math.floor(value) : ceil;
+      };
+      /* размер сетки по широте, размер ячейки по широте */
+
+
+      var northPoint = [bbox[3], bbox[0]];
+      var southPoint = [bbox[1], bbox[0]];
+      var LatDistance = distance(southPoint, northPoint);
+      var latSize = odd(LatDistance / cellSize);
+      var degreeLatCellSize = Math.abs(bbox[1] - bbox[3]) * cellSize / LatDistance;
+      /* по долготе */
+      // const westPoint = [bbox[1] + LatDistance / 2 / cellSize * degreeLatCellSize, bbox[0]];
+      // const eastPoint = [bbox[1] + LatDistance / 2 / cellSize * degreeLatCellSize, bbox[2]];
+
+      var westPoint = [bbox[1], bbox[0]];
+      var eastPoint = [bbox[1], bbox[2]];
+      var LongDistance = distance(eastPoint, westPoint);
+      var longSize = odd(LongDistance / cellSize);
+      var degreeLongCellSize = Math.abs(bbox[0] - bbox[2]) * cellSize / LongDistance;
+      return {
+        latSize: latSize,
+        longSize: longSize,
+        degreeLatCellSize: degreeLatCellSize,
+        degreeLongCellSize: degreeLongCellSize
+      };
+    }
+
+    function IDW(points, options) {
+      var bbox = options.bbox,
+          exponent = options.exponent,
+          cellSize = options.cellSize,
+          units = options.units;
+
+      var _cellSizes = cellSizes(bbox, cellSize),
+          latSize = _cellSizes.latSize,
+          longSize = _cellSizes.longSize,
+          degreeLatCellSize = _cellSizes.degreeLatCellSize,
+          degreeLongCellSize = _cellSizes.degreeLongCellSize;
+
+      var Grid = [];
+
+      var _points = units !== 'degrees' ? _toConsumableArray(points) : points.map(function (point) {
+        return [Math.abs(bbox[1] - point[0]) / degreeLatCellSize, Math.abs(bbox[0] - point[1]) / degreeLongCellSize, point[2]];
+      });
+
+      for (var i = 0; i < latSize; i++) {
+        Grid[i] = [];
+
+        var _loop = function _loop(j) {
+          var cellCenter = units !== 'degrees' ? [bbox[1] + (i + 0.5) * degreeLatCellSize, bbox[0] + (j + 0.5) * degreeLongCellSize] : [i + 0.5, j + 0.5];
+          var top = 0,
+              bot = 0;
+
+          _points.forEach(function (point) {
+            var d = units !== 'degrees' ? distance(point, cellCenter) : Math.pow(Math.pow(cellCenter[0] - point[0], 2) + Math.pow(cellCenter[1] - point[1], 2), 2);
+            top += point[2] / Math.pow(d, exponent);
+            bot += 1 / Math.pow(d, exponent);
+          });
+
+          Grid[i][j] = top / bot;
+        };
+
+        for (var j = 0; j < longSize; j++) {
+          _loop(j);
+        }
+      }
+
+      return Grid;
+    }
+
+    exports.DrawGridWithExtrs = DrawGridWithExtrs;
+    exports.DrawIsobandsWithCustomGrid = DrawIsobandsWithCustomGrid;
     exports.DrawIsobandsWithExtrs = DrawIsobandsWithExtrs;
     exports.DrawIsobandsWithoutExtrs = DrawIsobandsWithoutExtrs;
     exports.DrawIsolinesWitchCustomGrid = DrawIsolinesWitchCustomGrid;
     exports.DrawIsolinesWithExtrs = DrawIsolinesWithExtrs;
     exports.DrawIsolinesWithoutExtrs = DrawIsolinesWithoutExtrs;
+    exports.IDW = IDW;
+    exports.cellSizes = cellSizes;
 
     Object.defineProperty(exports, '__esModule', { value: true });
 
