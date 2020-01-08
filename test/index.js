@@ -1,4 +1,4 @@
-const map = L.map('map').setView([56.00392292119433, 92.8734346385504], 4);
+const map = L.map('map').setView([56.002185782874385, 92.80699768043269], 15);
 
 L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
     maxZoom: 18,
@@ -12,19 +12,25 @@ L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_toke
 L.control.ruler().addTo(map);
 
 
+const rand = (min, max) => Math.random() * (max - min) + min;
 
 
 const dots = [
-    [-61.99, 85.77, 0],
-    [55.01, 87.82, 1],
-    [58.96, 88.78, 2],
-    [60.98, 90.87, 3],
-    [62.00, 91.96, 4],
-    [65.02, 93.07, 5],
-    [68.05, 94.94, 8],
-    [70.09, 95.01, 9],
-    [75.07, 96.70, 11]
+    /*   [-61.99, 85.77, 0],
+      [55.01, 87.82, 1],
+      [58.96, 88.78, 2],
+      [60.98, 90.87, 3],
+      [62.00, 91.96, 4],
+      [63.02, 93.07, 5],
+      [65.05, 94.94, 8],
+      [68.09, 95.01, 9],
+      [70.07, 96.70, 11] */
 ]
+
+for (let i = 0; i < 50; i++) {
+    dots.push([rand(56, 56.01), rand(92.79, 92.81), rand(-1, 11)])
+
+}
 
 
 const pointsFeatures = dots.map(dot => {
@@ -49,25 +55,23 @@ const points = {
     "features": pointsFeatures
 }
 
-const gridSize = 70000;
+const gridSize = 50;
 
 
 function drawTurf() {
 
-    const options = { gridType: 'points', property: 'value', units: 'meters', weight: 4 };
+    const options = { gridType: 'points', property: 'value', units: 'meters', weight: 2 };
     console.time('interpolateTruf')
     const grid = turf.interpolate(points, gridSize, options);
-
-    /*   grid.features.forEach(feature => {
-          L.geoJSON(feature).bindPopup(feature.properties.value.toString()).addTo(map);
-      });
-   */
     console.timeEnd('interpolateTruf')
+
+
     const breaks = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 
     console.time('isobandturf')
     const lines = turf.isobands(grid, breaks, { zProperty: 'value' });
     console.timeEnd('isobandturf')
+
     const colorsTurf = {
         "0-1": "#530FAD",
         "1-2": "#1B1BB3",
@@ -101,38 +105,34 @@ function drawDline() {
 
     const extrs = [85.77, -61.99, 96.70, 75.07]
 
-    L.marker([-61.99, 85.77]).bindPopup('s').addTo(map)
-    L.marker([75.07, 96.70]).bindPopup('s').addTo(map)
-    L.marker([-61.99, 96.70]).bindPopup('s').addTo(map)
-    L.marker([6.539999999999999, 85.77]).bindPopup('s').addTo(map)
-
-    console.time('interpolateDline')
-    const grid = dline.DrawGridWithExtrs(dots, extrs, gridSize)
-    console.timeEnd('interpolateDline')
-
-    const cellSizes = dline.cellSizes(extrs, gridSize);
 
     console.time('IDW')
-    const IDW = dline.IDW(dots, { bbox: extrs, exponent: 1, cellSize: gridSize, units: 'degrees' });
+    const IDW = dline.IDW(dots, gridSize / 2, { bbox: [0, 0], exponent: 2, units: ['meters', 'meters'] });
     console.timeEnd('IDW')
 
+    console.log(IDW);
 
 
-  /*   for (let i = 0; i < cellSizes.latSize; i++) {
-        for (let j = 0; j < cellSizes.longSize; j++) {
-            L.polygon([
-                [extrs[1] + (cellSizes.degreeLatCellSize * i), extrs[0] + (cellSizes.degreeLongCellSize * j)],
-                [extrs[1] + (cellSizes.degreeLatCellSize * i) + cellSizes.degreeLatCellSize, extrs[0] + (cellSizes.degreeLongCellSize * j)],
-                [extrs[1] + (cellSizes.degreeLatCellSize * i) + cellSizes.degreeLatCellSize, extrs[0] + (cellSizes.degreeLongCellSize * j) + cellSizes.degreeLongCellSize],
-                [extrs[1] + (cellSizes.degreeLatCellSize * i), extrs[0] + (cellSizes.degreeLongCellSize * j) + cellSizes.degreeLongCellSize]
-            ]).addTo(map)
+    const lin = dline.DrawIsolinesWitchCustomGrid(IDW.grid, step, IDW.degreeLatCellSize, IDW.degreeLongCellSize, IDW.bbox[1], IDW.bbox[0], 11, 0)
+
+    console.log(lin);
+
+
+    map.eachLayer(layer => {
+        if (layer.options.type === "band") {
+            map.removeLayer(layer)
         }
-    }
- */
+    })
+    lin.features.forEach(feature => {
+        L.geoJSON(feature, { type: "band" }).bindPopup(feature.properties.value.toString()).addTo(map);
+    });
 
-    console.time('isobandsDline')
-    const bands = dline.DrawIsobandsWithCustomGrid(IDW, step, cellSizes.degreeLatCellSize, cellSizes.degreeLongCellSize, extrs[1], extrs[0], 11, 0)
+    /* console.time('isobandsDline')
+    const bands = dline.DrawIsobandsWithCustomGrid(IDW.grid, step, IDW.degreeLatCellSize, IDW.degreeLongCellSize, IDW.bbox[1], IDW.bbox[0], 11, 0)
     console.timeEnd('isobandsDline')
+
+    console.log(bands);
+
 
     const colors = {
         "less than 1": "#530FAD",
@@ -148,13 +148,107 @@ function drawDline() {
         "more than 10": "#FF0000",
     };
 
+    map.eachLayer(layer => {
+        if (layer.options.type === "band") {
+            map.removeLayer(layer)
+        }
+    })
+    bands.GeoJson.features.forEach(feature => {
+        L.geoJSON(feature, { color: colors[feature.properties.value], weight: 0, fillOpacity: 1, type: "band" }).bindPopup(feature.properties.value.toString()).addTo(map);
+    });
+
+
+
+    let cunt = -1;
+
+    function next() {
+
+        if (cunt === bands.chache.length - 1) return;
+        cunt++;
+        map.eachLayer(layer => {
+            if (layer.options.type === "line") {
+                map.removeLayer(layer)
+            }
+        })
+
+        for (let i = 0; i < bands.chache[cunt].length; i++) {
+            const nb = bands.chache[cunt][i].map(e => [...e]);
+            L.polyline(nb.map(e => e.reverse()), { color: '#fff', type: "line" }).addTo(map);
+        }
+    }
+
+    function prev() {
+
+        if (cunt === 0) return;
+
+        cunt--;
+        map.eachLayer(layer => {
+            if (layer.options.type === "line") {
+                map.removeLayer(layer)
+            }
+        })
+
+        for (let i = 0; i < bands.chache[cunt].length; i++) {
+            const nb = bands.chache[cunt][i].map(e => [...e]);
+            L.polyline(nb.map(e => e.reverse()), { color: '#fff', type: "line" }).addTo(map);
+        }
+    }
+
+    next();
+
+    document.querySelector('#next').addEventListener('click', next)
+    document.querySelector('#prev').addEventListener('click', prev) */
+
+}
+
+
+function drawDlineBands() {
+    step = {
+        "type": "CustomValues",
+        "values": [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
+    }
+
+
+    const extrs = [85.77, -61.99, 96.70, 75.07]
+
+
+    console.time('IDW')
+    const IDW = dline.IDW(dots, gridSize / 2, { bbox: [0, 0], exponent: 2, units: ['meters', 'meters'] });
+    console.timeEnd('IDW')
 
     map.eachLayer(layer => {
         if (layer.options.type === "band") {
             map.removeLayer(layer)
         }
     })
-    bands.features.forEach(feature => {
-        L.geoJSON(feature, { color: colors[feature.properties.value], weight: 0, fillOpacity: .6, type: "band" }).bindPopup(feature.properties.value.toString()).addTo(map);
+
+    console.time('isobandsDline')
+    const bands = dline.DrawIsobandsWithCustomGrid(IDW.grid, step, IDW.degreeLatCellSize, IDW.degreeLongCellSize, IDW.bbox[1], IDW.bbox[0], 11, 0)
+    console.timeEnd('isobandsDline')
+
+    console.log(bands);
+
+
+    const colors = {
+        "less than 1": "#530FAD",
+        "2": "#1B1BB3",
+        "3": "#0B61A4",
+        "4": "#00AF64",
+        "5": "#67E300",
+        "6": "#CCF600",
+        "7": "#FFE800",
+        "8": "#FFBF00",
+        "9": "#FF9200",
+        "10": "#FF4900",
+        "more than 10": "#FF0000",
+    };
+
+    map.eachLayer(layer => {
+        if (layer.options.type === "band") {
+            map.removeLayer(layer)
+        }
+    })
+    bands.GeoJson.features.forEach(feature => {
+        L.geoJSON(feature, { color: colors[feature.properties.value], weight: 0, fillOpacity: 1, type: "band" }).bindPopup(feature.properties.value.toString()).addTo(map);
     });
 }

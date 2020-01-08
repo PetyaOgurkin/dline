@@ -24,6 +24,8 @@ function drawIsolines(Grid, Step, DeltaLat, DeltaLong, Grid_Min_Lat, Grid_Min_Lo
     for (let i = 0; i < Steps.length; i++) {
 
         h = Steps[i];
+        console.log('----' + h + '----');
+
         Isolines.push(getIsolines(FindIsolines(Grid, h, LongFinish, LatFinish)));
         IsolinesValue.push(h);
     }

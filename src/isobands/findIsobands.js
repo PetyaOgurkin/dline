@@ -1,6 +1,13 @@
 function findIsobands(Grid, low, up, LongFinish, LatFinish) {
     const bands = [];
-    const interpolate = (f1, f2, c) => Math.abs(f2 - c) / (Math.abs(f2 - c) + Math.abs(c - f1));
+    const interpolate = (f1, f2, c) => {
+
+
+
+        return (c - f2) / (f1 - f2)
+
+        Math.abs(f2 - c) / (Math.abs(f2 - c) + Math.abs(c - f1))
+    };
 
     function wall(y, x) {
         if (y !== 0 && x !== 0 && x !== Grid[y].length - LongFinish - 3 && y !== Grid.length - LatFinish - 3) return 0;
