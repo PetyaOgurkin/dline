@@ -28,7 +28,7 @@ const dots = [
 ]
 
 for (let i = 0; i < 50; i++) {
-    dots.push([rand(56, 56.01), rand(92.79, 92.81), rand(-1, 11)])
+    dots.push([rand(55.9, 56.1), rand(92.7, 93.2), rand(-1, 11)])
 
 }
 
@@ -55,15 +55,15 @@ const points = {
     "features": pointsFeatures
 }
 
-const gridSize = 20;
+const gridSize = 300;
 
 
 function drawTurf() {
 
     const options = { gridType: 'points', property: 'value', units: 'meters', weight: 2 };
-    console.time('interpolateTruf')
+    // console.time('interpolateTruf')
     // const grid = turf.interpolate(points, gridSize, options);
-    console.timeEnd('interpolateTruf')
+    // console.timeEnd('interpolateTruf')
 
     // console.log(grid);
 
@@ -74,7 +74,7 @@ function drawTurf() {
     const lines = turf.isobands(pgrid, breaks, { zProperty: 'value' });
     console.timeEnd('isobandturf')
 
-    console.log(lines);
+    // console.log(lines);
 
 
     const colorsTurf = {
@@ -100,9 +100,6 @@ function drawTurf() {
         L.geoJSON(feature, { color: colorsTurf[feature.properties.value], weight: 0, fillOpacity: .6, type: "band" }).bindPopup(feature.properties.value.toString()).addTo(map);
     });
 
-   /*  pgrid.features.forEach((feature, i) => {
-        L.geoJSON(feature, { type: "band" }).bindPopup(feature.properties.value.toString()).addTo(map);
-    }); */
 }
 
 function drawDline() {
@@ -120,98 +117,16 @@ function drawDline() {
 
 
     console.time('IDW')
-    const IDW = dline.IDW(dots, gridSize / 2, { bbox: [0, 0], exponent: 2, units: ['meters', 'meters'] });
+    const IDW = dline.IDW(dots, gridSize, { bbox: [100, 100], exponent: 0.5, units: ['meters', 'degrees'] });
     console.timeEnd('IDW')
 
-   /*  for (let i = 0; i < IDW.grid.length; i++) {
-        for (let j = 0; j < IDW.grid[i].length; j++) {
-            L.marker(([i * IDW.degreeLatCellSize + IDW.bbox[1], j * IDW.degreeLongCellSize + IDW.bbox[0]]), { type: "band" }).bindPopup(IDW.grid[i][j].toString()).addTo(map);
-        }
-
-    } */
-
-
+    console.time('dline isolines')
     const lin = dline.DrawIsolinesWitchCustomGrid(IDW.grid, step, IDW.degreeLatCellSize, IDW.degreeLongCellSize, IDW.bbox[1], IDW.bbox[0], 11, 0)
-
-    console.log(lin);
-
-
+    console.timeEnd('dline isolines')
 
     lin.features.forEach(feature => {
         L.geoJSON(feature, { type: "band" }).bindPopup(feature.properties.value.toString()).addTo(map);
     });
-
-    /* console.time('isobandsDline')
-    const bands = dline.DrawIsobandsWithCustomGrid(IDW.grid, step, IDW.degreeLatCellSize, IDW.degreeLongCellSize, IDW.bbox[1], IDW.bbox[0], 11, 0)
-    console.timeEnd('isobandsDline')
-
-    console.log(bands);
-
-
-    const colors = {
-        "less than 1": "#530FAD",
-        "2": "#1B1BB3",
-        "3": "#0B61A4",
-        "4": "#00AF64",
-        "5": "#67E300",
-        "6": "#CCF600",
-        "7": "#FFE800",
-        "8": "#FFBF00",
-        "9": "#FF9200",
-        "10": "#FF4900",
-        "more than 10": "#FF0000",
-    };
-
-    map.eachLayer(layer => {
-        if (layer.options.type === "band") {
-            map.removeLayer(layer)
-        }
-    })
-    bands.GeoJson.features.forEach(feature => {
-        L.geoJSON(feature, { color: colors[feature.properties.value], weight: 0, fillOpacity: 1, type: "band" }).bindPopup(feature.properties.value.toString()).addTo(map);
-    });
-
-
-
-    let cunt = -1;
-
-    function next() {
-
-        if (cunt === bands.chache.length - 1) return;
-        cunt++;
-        map.eachLayer(layer => {
-            if (layer.options.type === "line") {
-                map.removeLayer(layer)
-            }
-        })
-
-        for (let i = 0; i < bands.chache[cunt].length; i++) {
-            const nb = bands.chache[cunt][i].map(e => [...e]);
-            L.polyline(nb.map(e => e.reverse()), { color: '#fff', type: "line" }).addTo(map);
-        }
-    }
-
-    function prev() {
-
-        if (cunt === 0) return;
-
-        cunt--;
-        map.eachLayer(layer => {
-            if (layer.options.type === "line") {
-                map.removeLayer(layer)
-            }
-        })
-
-        for (let i = 0; i < bands.chache[cunt].length; i++) {
-            const nb = bands.chache[cunt][i].map(e => [...e]);
-            L.polyline(nb.map(e => e.reverse()), { color: '#fff', type: "line" }).addTo(map);
-        }
-    }
-
-    next();
-
-    document.querySelector('#next').addEventListener('click', next)
-    document.querySelector('#prev').addEventListener('click', prev) */
 
 }
 
@@ -230,15 +145,9 @@ function drawDlineBands() {
         }
     })
 
-    const extrs = [85.77, -61.99, 96.70, 75.07]
-
-
     console.time('IDW')
-    const IDW = dline.IDW(dots, gridSize / 2, { bbox: [0, 0], exponent: 2, units: ['meters', 'meters'] });
+    const IDW = dline.IDW(dots, gridSize, { bbox: [100, 100], exponent: 0.5, units: ['meters', 'degrees'] });
     console.timeEnd('IDW')
-
-    console.log(IDW);
-
 
 
     pgrid.features = [];
@@ -253,22 +162,15 @@ function drawDlineBands() {
                         "coordinates": [j * IDW.degreeLongCellSize + IDW.bbox[0], i * IDW.degreeLatCellSize + IDW.bbox[1]]
                     }
                 })
-                // L.marker(([i * IDW.degreeLatCellSize + IDW.bbox[1], j * IDW.degreeLongCellSize + IDW.bbox[0]]), { type: "band" }).bindPopup(IDW.grid[i][j].toString()).addTo(map);
             }
         }
-
     }
-
-    // console.log(pgrid);
-
-
 
     console.time('isobandsDline')
     const bands = dline.DrawIsobandsWithCustomGrid(IDW.grid, step, IDW.degreeLatCellSize, IDW.degreeLongCellSize, IDW.bbox[1], IDW.bbox[0], 11, 0)
     console.timeEnd('isobandsDline')
 
-    console.log(bands);
-
+    // console.log(bands);
 
     const colors = {
         "less than 1": "#530FAD",
@@ -284,12 +186,8 @@ function drawDlineBands() {
         "more than 10": "#FF0000",
     };
 
-    /*   map.eachLayer(layer => {
-          if (layer.options.type === "band") {
-              map.removeLayer(layer)
-          }
-      }) */
+
     bands.GeoJson.features.forEach(feature => {
-        L.geoJSON(feature, { color: colors[feature.properties.value], weight: 0, fillOpacity: 1, type: "band" }).bindPopup(feature.properties.value.toString()).addTo(map);
+        L.geoJSON(feature, { color: colors[feature.properties.value], weight: 0, fillOpacity: 0.7, type: "band" }).bindPopup(feature.properties.value.toString()).addTo(map);
     });
 }

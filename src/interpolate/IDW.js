@@ -18,7 +18,6 @@ function IDW(points, cellSize, options = {}) {
 
     return { grid, latSize, longSize, degreeLatCellSize, degreeLongCellSize, bbox }
 
-
     function calcInDegrees() {
         const _points = points.map(point => [
             Math.abs(bbox[1] - point[0]) / degreeLatCellSize,
@@ -45,12 +44,9 @@ function IDW(points, cellSize, options = {}) {
     function calcInMeters() {
         const Grid = [];
 
-        let start;
         for (let i = 0; i < latSize; i++) {
             Grid[i] = [];
-
-           /*  start = i % 2 === 0 ? 0 : 1; */
-            for (let j = 0/* start */; j < longSize; j += 1) {
+            for (let j = 0; j < longSize; j ++) {
 
                 const cellCenter = [bbox[1] + (i + 0.5) * degreeLatCellSize, bbox[0] + (j + 0.5) * degreeLongCellSize];
 

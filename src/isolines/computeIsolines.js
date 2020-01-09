@@ -26,6 +26,13 @@ export default function computeIsolines(grid, h) {
     const P = (x, y, c) => [x, y + Math.abs(c - interpolate(C(x, y), D(x, y)))]
     const Q = (x, y, c) => [x + Math.abs(c - interpolate(D(x, y), A(x, y))), y]
 
+    const center = (x, y) => ((A(x, y) + B(x, y) + C(x, y) + D(x, y)) / 4) <= h ? 0 : 1;
+
+    const getTernaryCode = (a, b, c, d) => {
+        const check = v => v <= h ? "0" : "1";
+        return check(a) + check(b) + check(c) + check(d);
+    }
+
     function edges(way, x, y) {
         switch (way) {
             case "a-": return [...M(x, y, 0), ...Q(x, y, 1)];
@@ -54,19 +61,11 @@ export default function computeIsolines(grid, h) {
 
     for (let i = 0, len = grid.length - 1; i < len; i++) {
         for (let j = 0, len1 = grid[i].length - 1; j < len1; j++) {
-
-            const _a = grid[i + 1][j] <= h ? "0" : "1",
-                _b = grid[i + 1][j + 1] <= h ? "0" : "1",
-                _c = grid[i][j + 1] <= h ? "0" : "1",
-                _d = grid[i][j] <= h ? "0" : "1";
-
-            contour(_a + _b + _c + _d, i, j);
+            contouring(getTernaryCode(A(i, j), B(i, j), C(i, j), D(i, j)), i, j);
         }
     }
 
-    const center = (x, y) => ((A(x, y) + B(x, y) + C(x, y) + D(x, y)) / 4) <= h ? 0 : 1;
-
-    function contour(val, x, y) {
+    function contouring(val, x, y) {
         if (val === "0000" || val === "1111") return;
 
         let o;

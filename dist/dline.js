@@ -93,6 +93,50 @@
       };
     }
 
+    /* из пар точек делает последовательность */
+    function getIsolines(RawIsolines) {
+      var TempIsolines = [];
+      var End_Isoline = true;
+
+      while (RawIsolines.length > 0) {
+        if (End_Isoline === true) {
+          TempIsolines.push([]);
+          TempIsolines[TempIsolines.length - 1].push([RawIsolines[0][0], RawIsolines[0][1]], [RawIsolines[0][2], RawIsolines[0][3]]);
+          RawIsolines.splice(0, 1);
+        }
+
+        End_Isoline = true;
+
+        for (var i = 0, len = RawIsolines.length; i < len; i++) {
+          if (TempIsolines[TempIsolines.length - 1][TempIsolines[TempIsolines.length - 1].length - 1][0] === RawIsolines[i][0] && TempIsolines[TempIsolines.length - 1][TempIsolines[TempIsolines.length - 1].length - 1][1] === RawIsolines[i][1]) {
+            TempIsolines[TempIsolines.length - 1].push([RawIsolines[i][2], RawIsolines[i][3]]);
+            RawIsolines.splice(i, 1);
+            End_Isoline = false;
+            break;
+          } else if (TempIsolines[TempIsolines.length - 1][TempIsolines[TempIsolines.length - 1].length - 1][0] === RawIsolines[i][2] && TempIsolines[TempIsolines.length - 1][TempIsolines[TempIsolines.length - 1].length - 1][1] === RawIsolines[i][3]) {
+            TempIsolines[TempIsolines.length - 1].push([RawIsolines[i][0], RawIsolines[i][1]]);
+            RawIsolines.splice(i, 1);
+            End_Isoline = false;
+            break;
+          }
+
+          if (TempIsolines[TempIsolines.length - 1][0][0] === RawIsolines[i][0] && TempIsolines[TempIsolines.length - 1][0][1] === RawIsolines[i][1]) {
+            TempIsolines[TempIsolines.length - 1].unshift([RawIsolines[i][2], RawIsolines[i][3]]);
+            RawIsolines.splice(i, 1);
+            End_Isoline = false;
+            break;
+          } else if (TempIsolines[TempIsolines.length - 1][0][0] === RawIsolines[i][2] && TempIsolines[TempIsolines.length - 1][0][1] === RawIsolines[i][3]) {
+            TempIsolines[TempIsolines.length - 1].unshift([RawIsolines[i][0], RawIsolines[i][1]]);
+            RawIsolines.splice(i, 1);
+            End_Isoline = false;
+            break;
+          }
+        }
+      }
+
+      return TempIsolines;
+    }
+
     function _typeof(obj) {
       if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
         _typeof = function (obj) {
@@ -125,632 +169,6 @@
 
     function _nonIterableSpread() {
       throw new TypeError("Invalid attempt to spread non-iterable instance");
-    }
-
-    /* из пар точек делает последовательность */
-
-    function getIsolines(RawIsolines, longMax, latMax) {
-      var TempIsolines = [];
-      var End_Isoline = true;
-
-      while (RawIsolines.length > 0) {
-        if (End_Isoline === true) {
-          TempIsolines.push([]);
-          TempIsolines[TempIsolines.length - 1].push([RawIsolines[0][0], RawIsolines[0][1]], [RawIsolines[0][2], RawIsolines[0][3]]);
-          /* if (RawIsolines[0][0] === 0.5 || RawIsolines[0][1] === 0.5 || RawIsolines[0][2] === 0.5 || RawIsolines[0][3] === 0.5 ||
-              RawIsolines[0][0] === latMax || RawIsolines[0][1] === longMax || RawIsolines[0][2] === latMax || RawIsolines[0][3] === longMax) {
-              dualInterpolate[dualInterpolate.length - 1].push([RawIsolines[0][0], RawIsolines[0][1]], [RawIsolines[0][2], RawIsolines[0][3]]);
-          } else {
-              dualInterpolate[dualInterpolate.length - 1].push(getCentroid([RawIsolines[0][0], RawIsolines[0][1]], [RawIsolines[0][2], RawIsolines[0][3]]))
-          } */
-
-          RawIsolines.splice(0, 1);
-        }
-
-        End_Isoline = true;
-
-        for (var i = 0, len = RawIsolines.length; i < len; i++) {
-          if (TempIsolines[TempIsolines.length - 1][TempIsolines[TempIsolines.length - 1].length - 1][0] === RawIsolines[i][0] && TempIsolines[TempIsolines.length - 1][TempIsolines[TempIsolines.length - 1].length - 1][1] === RawIsolines[i][1]) {
-            TempIsolines[TempIsolines.length - 1].push([RawIsolines[i][2], RawIsolines[i][3]]);
-            /* if (RawIsolines[i][0] === 0.5 || RawIsolines[i][1] === 0.5 || RawIsolines[i][2] === 0.5 || RawIsolines[i][3] === 0.5 ||
-                RawIsolines[i][0] === latMax || RawIsolines[i][1] === longMax || RawIsolines[i][2] === latMax || RawIsolines[i][3] === longMax) {
-                dualInterpolate[dualInterpolate.length - 1].push([RawIsolines[i][2], RawIsolines[i][3]])
-            } else {
-                dualInterpolate[dualInterpolate.length - 1].push(getCentroid([RawIsolines[i][0], RawIsolines[i][1]], [RawIsolines[i][2], RawIsolines[i][3]]))
-            } */
-
-            RawIsolines.splice(i, 1);
-            End_Isoline = false;
-            break;
-          } else if (TempIsolines[TempIsolines.length - 1][TempIsolines[TempIsolines.length - 1].length - 1][0] === RawIsolines[i][2] && TempIsolines[TempIsolines.length - 1][TempIsolines[TempIsolines.length - 1].length - 1][1] === RawIsolines[i][3]) {
-            TempIsolines[TempIsolines.length - 1].push([RawIsolines[i][0], RawIsolines[i][1]]);
-            /* if (RawIsolines[i][0] === 0.5 || RawIsolines[i][1] === 0.5 || RawIsolines[i][2] === 0.5 || RawIsolines[i][3] === 0.5 ||
-                RawIsolines[i][0] === latMax || RawIsolines[i][1] === longMax || RawIsolines[i][2] === latMax || RawIsolines[i][3] === longMax) {
-                dualInterpolate[dualInterpolate.length - 1].push([RawIsolines[i][0], RawIsolines[i][1]])
-            } else {
-                dualInterpolate[dualInterpolate.length - 1].push(getCentroid([RawIsolines[i][0], RawIsolines[i][1]], [RawIsolines[i][2], RawIsolines[i][3]]))
-            } */
-
-            RawIsolines.splice(i, 1);
-            End_Isoline = false;
-            break;
-          }
-
-          if (TempIsolines[TempIsolines.length - 1][0][0] === RawIsolines[i][0] && TempIsolines[TempIsolines.length - 1][0][1] === RawIsolines[i][1]) {
-            TempIsolines[TempIsolines.length - 1].unshift([RawIsolines[i][2], RawIsolines[i][3]]);
-            /*  if (RawIsolines[i][0] === 0.5 || RawIsolines[i][1] === 0.5 || RawIsolines[i][2] === 0.5 || RawIsolines[i][3] === 0.5 ||
-                 RawIsolines[i][0] === latMax || RawIsolines[i][1] === longMax || RawIsolines[i][2] === latMax || RawIsolines[i][3] === longMax) {
-                 dualInterpolate[dualInterpolate.length - 1].unshift([RawIsolines[i][2], RawIsolines[i][3]])
-             } else {
-                 dualInterpolate[dualInterpolate.length - 1].unshift(getCentroid([RawIsolines[i][0], RawIsolines[i][1]], [RawIsolines[i][2], RawIsolines[i][3]]))
-             } */
-
-            RawIsolines.splice(i, 1);
-            End_Isoline = false;
-            break;
-          } else if (TempIsolines[TempIsolines.length - 1][0][0] === RawIsolines[i][2] && TempIsolines[TempIsolines.length - 1][0][1] === RawIsolines[i][3]) {
-            TempIsolines[TempIsolines.length - 1].unshift([RawIsolines[i][0], RawIsolines[i][1]]);
-            /*   if (RawIsolines[i][0] === 0.5 || RawIsolines[i][1] === 0.5 || RawIsolines[i][2] === 0.5 || RawIsolines[i][3] === 0.5 ||
-                  RawIsolines[i][0] === latMax || RawIsolines[i][1] === longMax || RawIsolines[i][2] === latMax || RawIsolines[i][3] === longMax) {
-                  dualInterpolate[dualInterpolate.length - 1].unshift([RawIsolines[i][0], RawIsolines[i][1]])
-              } else {
-                  dualInterpolate[dualInterpolate.length - 1].unshift(getCentroid([RawIsolines[i][0], RawIsolines[i][1]], [RawIsolines[i][2], RawIsolines[i][3]]))
-              }
-            */
-
-            RawIsolines.splice(i, 1);
-            End_Isoline = false;
-            break;
-          }
-        }
-        /* if (End_Isoline) {
-            if (TempIsolines[TempIsolines.length - 1][0][0] === TempIsolines[TempIsolines.length - 1][TempIsolines[TempIsolines.length - 1].length - 1][0] &&
-                TempIsolines[TempIsolines.length - 1][0][1] === TempIsolines[TempIsolines.length - 1][TempIsolines[TempIsolines.length - 1].length - 1][1]) {
-                dualInterpolate[dualInterpolate.length - 1].push([dualInterpolate[dualInterpolate.length - 1][0][0], dualInterpolate[dualInterpolate.length - 1][0][1]])
-            }
-        } */
-
-      }
-      /*   if (TempIsolines[TempIsolines.length - 1][0][0] === TempIsolines[TempIsolines.length - 1][TempIsolines[TempIsolines.length - 1].length - 1][0] &&
-            TempIsolines[TempIsolines.length - 1][0][1] === TempIsolines[TempIsolines.length - 1][TempIsolines[TempIsolines.length - 1].length - 1][1]) {
-            dualInterpolate[dualInterpolate.length - 1].push([dualInterpolate[dualInterpolate.length - 1][0][0], dualInterpolate[dualInterpolate.length - 1][0][1]])
-        } */
-
-
-      return TempIsolines;
-    }
-
-    function findIsobands(Grid, low, up, LongFinish, LatFinish) {
-      var bands = [];
-
-      var interpolate = function interpolate(f1, f2, c) {
-        return (c - f2) / (f1 - f2);
-      };
-
-      function wall(y, x) {
-        if (y !== 0 && x !== 0 && x !== Grid[y].length - LongFinish - 3 && y !== Grid.length - LatFinish - 3) return 0;else if (y === 0 && x !== 0 && x !== Grid[y].length - LongFinish - 3) return "c";else if (y !== 0 && x === Grid[y].length - LongFinish - 3 && y !== Grid.length - LatFinish - 3) return "b";else if (y === Grid.length - LatFinish - 3 && x !== 0 && x !== Grid[y].length - LongFinish - 3) return "a";else if (y !== 0 && x === 0 && y !== Grid.length - LatFinish - 3) return "d";else if (y === 0 && x === Grid[y].length - LongFinish - 3) return "bc";else if (y === Grid.length - LatFinish - 3 && x === Grid[y].length - LongFinish - 3) return "ab";else if (y === Grid.length - LatFinish - 3 && x === 0) return "ad";else if (y === 0 && x === 0) return "cd";
-      }
-
-      function cells(y, x, c, val) {
-        switch (val) {
-          case "a":
-            return [y + 1 + interpolate(Grid[y + 2][x], Grid[y][x], c), x + 0.5, y + 2.5, x + 1 + interpolate(Grid[y + 2][x + 2], Grid[y + 2][x], c)];
-
-          case "b":
-            return [y + 2.5, x + 1 + interpolate(Grid[y + 2][x + 2], Grid[y + 2][x], c), y + 1 + interpolate(Grid[y + 2][x + 2], Grid[y][x + 2], c), x + 2.5];
-
-          case "c":
-            return [y + 1 + interpolate(Grid[y + 2][x + 2], Grid[y][x + 2], c), x + 2.5, y + 0.5, x + 1 + interpolate(Grid[y][x + 2], Grid[y][x], c)];
-
-          case "d":
-            return [y + 1 + interpolate(Grid[y + 2][x], Grid[y][x], c), x + 0.5, y + 0.5, x + 1 + interpolate(Grid[y][x + 2], Grid[y][x], c)];
-
-          case "v":
-            return [y + 2.5, x + 1 + interpolate(Grid[y + 2][x + 2], Grid[y + 2][x], c), y + 0.5, x + 1 + interpolate(Grid[y][x + 2], Grid[y][x], c)];
-
-          case "h":
-            return [y + 1 + interpolate(Grid[y + 2][x], Grid[y][x], c), x + 0.5, y + 1 + interpolate(Grid[y + 2][x + 2], Grid[y][x + 2], c), x + 2.5];
-        }
-      }
-
-      function sides(y, x, c, val) {
-        switch (val) {
-          case "t_l":
-            return [y + 2.5, x + 0.5, y + 2.5, x + 1 + interpolate(Grid[y + 2][x + 2], Grid[y + 2][x], c)];
-
-          case "t_r":
-            return [y + 2.5, x + 2.5, y + 2.5, x + 1 + interpolate(Grid[y + 2][x + 2], Grid[y + 2][x], c)];
-
-          case "r_t":
-            return [y + 2.5, x + 2.5, y + 1 + interpolate(Grid[y + 2][x + 2], Grid[y][x + 2], c), x + 2.5];
-
-          case "r_b":
-            return [y + 0.5, x + 2.5, y + 1 + interpolate(Grid[y + 2][x + 2], Grid[y][x + 2], c), x + 2.5];
-
-          case "b_l":
-            return [y + 0.5, x + 0.5, y + 0.5, x + 1 + interpolate(Grid[y][x + 2], Grid[y][x], c)];
-
-          case "b_r":
-            return [y + 0.5, x + 2.5, y + 0.5, x + 1 + interpolate(Grid[y][x + 2], Grid[y][x], c)];
-
-          case "l_t":
-            return [y + 2.5, x + 0.5, y + 1 + interpolate(Grid[y + 2][x], Grid[y][x], c), x + 0.5];
-
-          case "l_b":
-            return [y + 0.5, x + 0.5, y + 1 + interpolate(Grid[y + 2][x], Grid[y][x], c), x + 0.5];
-        }
-      }
-
-      function center_sides_horiz(y, x, c_l, c_r, val) {
-        if (val === "t_c") {
-          return [y + 2.5, x + 1 + interpolate(Grid[y + 2][x + 2], Grid[y + 2][x], c_l), y + 2.5, x + 1 + interpolate(Grid[y + 2][x + 2], Grid[y + 2][x], c_r)];
-        } else if (val === "b_c") {
-          return [y + 0.5, x + 1 + interpolate(Grid[y][x + 2], Grid[y][x], c_l), y + 0.5, x + 1 + interpolate(Grid[y][x + 2], Grid[y][x], c_r)];
-        }
-      }
-
-      function center_sides_vert(y, x, c_t, c_b, val) {
-        if (val === "r_c") {
-          return [y + 1 + interpolate(Grid[y + 2][x + 2], Grid[y][x + 2], c_t), x + 2.5, y + 1 + interpolate(Grid[y + 2][x + 2], Grid[y + 2][x], c_b), x + 2.5];
-        } else if (val === "l_c") {
-          return [y + 1 + interpolate(Grid[y][x + 2], Grid[y][x + 2], c_t), x + 0.5, y + 1 + interpolate(Grid[y][x + 2], Grid[y][x], c_b), x + 0.5];
-        }
-      }
-
-      var a, b, c, d, e;
-      var wall_tmp;
-
-      for (var i = 0, len = Grid.length - LatFinish - 2; i < len; i += 2) {
-        for (var j = 0, len1 = Grid[i].length - LongFinish - 2; j < len1; j += 2) {
-          a = Grid[i + 2][j] < low ? "0" : Grid[i + 2][j] >= low && Grid[i + 2][j] < up ? "1" : Grid[i + 2][j] >= up ? "2" : NaN;
-          b = Grid[i + 2][j + 2] < low ? "0" : Grid[i + 2][j + 2] >= low && Grid[i + 2][j + 2] < up ? "1" : Grid[i + 2][j + 2] >= up ? "2" : NaN;
-          c = Grid[i][j + 2] < low ? "0" : Grid[i][j + 2] >= low && Grid[i][j + 2] < up ? "1" : Grid[i][j + 2] >= up ? "2" : NaN;
-          d = Grid[i][j] < low ? "0" : Grid[i][j] >= low && Grid[i][j] < up ? "1" : Grid[i][j] >= up ? "2" : NaN;
-          e = Grid[i + 1][j + 1] < low ? 0 : Grid[i + 1][j + 1] >= low && Grid[i + 1][j + 1] < up ? 1 : Grid[i + 1][j + 1] >= up ? 2 : NaN;
-          cells_main(a + b + c + d, i, j);
-          wall_tmp = wall(i, j);
-
-          if (wall_tmp !== 0) {
-            switch (wall_tmp) {
-              case "a":
-                side_a(a + b, i, j);
-                break;
-
-              case "b":
-                side_b(b + c, i, j);
-                break;
-
-              case "c":
-                side_c(c + d, i, j);
-                break;
-
-              case "d":
-                side_d(d + a, i, j);
-                break;
-
-              case "ab":
-                side_a(a + b, i, j);
-                side_b(b + c, i, j);
-                break;
-
-              case "bc":
-                side_b(b + c, i, j);
-                side_c(c + d, i, j);
-                break;
-
-              case "cd":
-                side_c(c + d, i, j);
-                side_d(d + a, i, j);
-                break;
-
-              case "ad":
-                side_a(a + b, i, j);
-                side_d(d + a, i, j);
-                break;
-            }
-          }
-        }
-      }
-
-      function cells_main(val, y, x) {
-        if (val === "0000" || val === "1111" || val === "2222") return;
-
-        switch (val) {
-          // single angle
-          case "2221":
-          case "1112":
-            bands.push(cells(y, x, up, "d"));
-            break;
-
-          case "0001":
-          case "1110":
-            bands.push(cells(y, x, low, "d"));
-            break;
-
-          case "2212":
-          case "1121":
-            bands.push(cells(y, x, up, "c"));
-            break;
-
-          case "0010":
-          case "1101":
-            bands.push(cells(y, x, low, "c"));
-            break;
-
-          case "2122":
-          case "1211":
-            bands.push(cells(y, x, up, "b"));
-            break;
-
-          case "0100":
-          case "1011":
-            bands.push(cells(y, x, low, "b"));
-            break;
-
-          case "1222":
-          case "2111":
-            bands.push(cells(y, x, up, "a"));
-            break;
-
-          case "1000":
-          case "0111":
-            bands.push(cells(y, x, low, "a"));
-            break;
-          // single rectangle
-
-          case "0011":
-          case "1100":
-            bands.push(cells(y, x, low, "h"));
-            break;
-
-          case "2211":
-          case "1122":
-            bands.push(cells(y, x, up, "h"));
-            break;
-
-          case "0110":
-          case "1001":
-            bands.push(cells(y, x, low, "v"));
-            break;
-
-          case "2112":
-          case "1221":
-            bands.push(cells(y, x, up, "v"));
-            break;
-
-          case "2200":
-          case "0022":
-            bands.push(cells(y, x, up, "h"), cells(y, x, low, "h"));
-            break;
-
-          case "2002":
-          case "0220":
-            bands.push(cells(y, x, up, "v"), cells(y, x, low, "v"));
-            break;
-          // single trapezoid
-
-          case "2220":
-          case "0002":
-            bands.push(cells(y, x, up, "d"), cells(y, x, low, "d"));
-            break;
-
-          case "2202":
-          case "0020":
-            bands.push(cells(y, x, up, "c"), cells(y, x, low, "c"));
-            break;
-
-          case "2022":
-          case "0200":
-            bands.push(cells(y, x, up, "b"), cells(y, x, low, "b"));
-            break;
-
-          case "0222":
-          case "2000":
-            bands.push(cells(y, x, up, "a"), cells(y, x, low, "a"));
-            break;
-          // single pentagon
-
-          case "1200":
-            bands.push(cells(y, x, up, "b"), cells(y, x, low, "h"));
-            break;
-
-          case "0120":
-            bands.push(cells(y, x, up, "c"), cells(y, x, low, "v"));
-            break;
-
-          case "0012":
-            bands.push(cells(y, x, up, "d"), cells(y, x, low, "h"));
-            break;
-
-          case "2001":
-            bands.push(cells(y, x, up, "a"), cells(y, x, low, "v"));
-            break;
-
-          case "1022":
-            bands.push(cells(y, x, low, "b"), cells(y, x, up, "h"));
-            break;
-
-          case "2102":
-            bands.push(cells(y, x, low, "c"), cells(y, x, up, "v"));
-            break;
-
-          case "2210":
-            bands.push(cells(y, x, low, "d"), cells(y, x, up, "h"));
-            break;
-
-          case "0221":
-            bands.push(cells(y, x, low, "a"), cells(y, x, up, "v"));
-            break;
-
-          case "1002":
-            bands.push(cells(y, x, up, "d"), cells(y, x, low, "v"));
-            break;
-
-          case "2100":
-            bands.push(cells(y, x, up, "a"), cells(y, x, low, "h"));
-            break;
-
-          case "0210":
-            bands.push(cells(y, x, up, "b"), cells(y, x, low, "v"));
-            break;
-
-          case "0021":
-            bands.push(cells(y, x, up, "c"), cells(y, x, low, "h"));
-            break;
-
-          case "1220":
-            bands.push(cells(y, x, low, "d"), cells(y, x, up, "v"));
-            break;
-
-          case "0122":
-            bands.push(cells(y, x, low, "a"), cells(y, x, up, "h"));
-            break;
-
-          case "2012":
-            bands.push(cells(y, x, low, "b"), cells(y, x, up, "v"));
-            break;
-
-          case "2201":
-            bands.push(cells(y, x, low, "c"), cells(y, x, up, "h"));
-            break;
-          //single hexagon
-
-          case "0211":
-            bands.push(cells(y, x, low, "a"), cells(y, x, up, "b"));
-            break;
-
-          case "2110":
-            bands.push(cells(y, x, up, "a"), cells(y, x, low, "d"));
-            break;
-
-          case "1102":
-            bands.push(cells(y, x, low, "c"), cells(y, x, up, "d"));
-            break;
-
-          case "1021":
-            bands.push(cells(y, x, low, "b"), cells(y, x, up, "c"));
-            break;
-
-          case "2011":
-            bands.push(cells(y, x, up, "a"), cells(y, x, low, "b"));
-            break;
-
-          case "0112":
-            bands.push(cells(y, x, low, "a"), cells(y, x, up, "d"));
-            break;
-
-          case "1120":
-            bands.push(cells(y, x, up, "c"), cells(y, x, low, "d"));
-            break;
-
-          case "1201":
-            bands.push(cells(y, x, up, "b"), cells(y, x, low, "c"));
-            break;
-
-          case "2101":
-            bands.push(cells(y, x, up, "a"), cells(y, x, low, "c"));
-            break;
-
-          case "0121":
-            bands.push(cells(y, x, low, "a"), cells(y, x, up, "c"));
-            break;
-
-          case "1012":
-            bands.push(cells(y, x, low, "b"), cells(y, x, up, "d"));
-            break;
-
-          case "1210":
-            bands.push(cells(y, x, up, "b"), cells(y, x, low, "d"));
-            break;
-          // center
-
-          case "2020":
-            if (e === 0) bands.push(cells(y, x, up, "a"), cells(y, x, low, "a"), cells(y, x, up, "c"), cells(y, x, low, "c"));else if (e === 1) bands.push(cells(y, x, up, "a"), cells(y, x, low, "b"), cells(y, x, up, "c"), cells(y, x, low, "d"));else if (e === 2) bands.push(cells(y, x, up, "b"), cells(y, x, low, "b"), cells(y, x, up, "d"), cells(y, x, low, "d"));
-            break;
-
-          case "0202":
-            if (e === 0) bands.push(cells(y, x, up, "b"), cells(y, x, low, "b"), cells(y, x, up, "d"), cells(y, x, low, "d"));else if (e === 1) bands.push(cells(y, x, low, "a"), cells(y, x, up, "b"), cells(y, x, low, "c"), cells(y, x, up, "d"));else if (e === 2) bands.push(cells(y, x, up, "a"), cells(y, x, low, "a"), cells(y, x, up, "c"), cells(y, x, low, "c"));
-            break;
-
-          case "0101":
-            if (e === 0) bands.push(cells(y, x, low, "b"), cells(y, x, low, "d"));else if (e === 1) bands.push(cells(y, x, low, "a"), cells(y, x, low, "c"));
-            break;
-
-          case "1010":
-            if (e === 0) bands.push(cells(y, x, low, "a"), cells(y, x, low, "c"));else if (e === 1) bands.push(cells(y, x, low, "b"), cells(y, x, low, "d"));
-            break;
-
-          case "2121":
-            if (e === 1) bands.push(cells(y, x, up, "a"), cells(y, x, up, "c"));else if (e === 2) bands.push(cells(y, x, up, "b"), cells(y, x, up, "d"));
-            break;
-
-          case "1212":
-            if (e === 1) bands.push(cells(y, x, up, "b"), cells(y, x, up, "d"));else if (e === 2) bands.push(cells(y, x, up, "a"), cells(y, x, up, "c"));
-            break;
-
-          case "2120":
-            if (e === 1) bands.push(cells(y, x, up, "a"), cells(y, x, up, "c"), cells(y, x, low, "d"));else if (e === 2) bands.push(cells(y, x, up, "b"), cells(y, x, up, "d"), cells(y, x, low, "d"));
-            break;
-
-          case "2021":
-            if (e === 1) bands.push(cells(y, x, up, "a"), cells(y, x, low, "b"), cells(y, x, up, "c"));else if (e === 2) bands.push(cells(y, x, up, "b"), cells(y, x, low, "b"), cells(y, x, up, "d"));
-            break;
-
-          case "1202":
-            if (e === 1) bands.push(cells(y, x, up, "b"), cells(y, x, low, "c"), cells(y, x, up, "d"));else if (e === 2) bands.push(cells(y, x, up, "a"), cells(y, x, up, "c"), cells(y, x, low, "c"));
-            break;
-
-          case "0212":
-            if (e === 1) bands.push(cells(y, x, low, "a"), cells(y, x, up, "b"), cells(y, x, up, "d"));else if (e === 2) bands.push(cells(y, x, up, "a"), cells(y, x, low, "a"), cells(y, x, up, "c"));
-            break;
-
-          case "0102":
-            if (e === 0) bands.push(cells(y, x, low, "b"), cells(y, x, up, "d"), cells(y, x, low, "d"));else if (e === 1) bands.push(cells(y, x, low, "a"), cells(y, x, low, "c"), cells(y, x, up, "d"));
-            break;
-
-          case "0201":
-            if (e === 0) bands.push(cells(y, x, up, "b"), cells(y, x, low, "b"), cells(y, x, low, "d"));else if (e === 1) bands.push(cells(y, x, low, "a"), cells(y, x, up, "b"), cells(y, x, low, "c"));
-            break;
-
-          case "1020":
-            if (e === 0) bands.push(cells(y, x, low, "a"), cells(y, x, up, "c"), cells(y, x, low, "c"));else if (e === 1) bands.push(cells(y, x, low, "b"), cells(y, x, up, "c"), cells(y, x, low, "d"));
-            break;
-
-          case "2010":
-            if (e === 0) bands.push(cells(y, x, up, "a"), cells(y, x, low, "a"), cells(y, x, low, "c"));else if (e === 1) bands.push(cells(y, x, up, "a"), cells(y, x, low, "c"), cells(y, x, low, "d"));
-            break;
-        }
-      }
-
-      function side_a(val, y, x) {
-        switch (val) {
-          case "01":
-            bands.push(sides(y, x, low, "t_r"));
-            break;
-
-          case "02":
-            bands.push(center_sides_horiz(y, x, low, up, "t_c"));
-            break;
-
-          case "10":
-            bands.push(sides(y, x, low, "t_l"));
-            break;
-
-          case "11":
-            bands.push([y + 2.5, x + 0.5, y + 2.5, x + 2.5]);
-            break;
-
-          case "12":
-            bands.push(sides(y, x, up, "t_l"));
-            break;
-
-          case "20":
-            bands.push(center_sides_horiz(y, x, up, low, "t_c"));
-            break;
-
-          case "21":
-            bands.push(sides(y, x, up, "t_r"));
-            break;
-        }
-      }
-
-      function side_b(val, y, x) {
-        switch (val) {
-          case "01":
-            bands.push(sides(y, x, low, "r_b"));
-            break;
-
-          case "02":
-            bands.push(center_sides_vert(y, x, low, up, "r_c"));
-            break;
-
-          case "10":
-            bands.push(sides(y, x, low, "r_t"));
-            break;
-
-          case "11":
-            bands.push([y + 0.5, x + 2.5, y + 2.5, x + 2.5]);
-            break;
-
-          case "12":
-            bands.push(sides(y, x, up, "r_t"));
-            break;
-
-          case "20":
-            bands.push(center_sides_vert(y, x, up, low, "r_c"));
-            break;
-
-          case "21":
-            bands.push(sides(y, x, up, "r_b"));
-            break;
-        }
-      }
-
-      function side_c(val, y, x) {
-        switch (val) {
-          case "01":
-            bands.push(sides(y, x, low, "b_l"));
-            break;
-
-          case "02":
-            bands.push(center_sides_horiz(y, x, low, up, "b_c"));
-            break;
-
-          case "10":
-            bands.push(sides(y, x, low, "b_r"));
-            break;
-
-          case "11":
-            bands.push([y + 0.5, x + 0.5, y + 0.5, x + 2.5]);
-            break;
-
-          case "12":
-            bands.push(sides(y, x, up, "b_r"));
-            break;
-
-          case "20":
-            bands.push(center_sides_horiz(y, x, up, low, "b_c"));
-            break;
-
-          case "21":
-            bands.push(sides(y, x, up, "b_l"));
-            break;
-        }
-      }
-
-      function side_d(val, y, x) {
-        switch (val) {
-          case "01":
-            bands.push(sides(y, x, low, "l_t"));
-            break;
-
-          case "02":
-            bands.push(center_sides_vert(y, x, low, up, "l_c"));
-            break;
-
-          case "10":
-            bands.push(sides(y, x, low, "l_b"));
-            break;
-
-          case "11":
-            bands.push([y + 0.5, x + 0.5, y + 2.5, x + 0.5]);
-            break;
-
-          case "12":
-            bands.push(sides(y, x, up, "l_b"));
-            break;
-
-          case "20":
-            bands.push(center_sides_vert(y, x, up, low, "l_c"));
-            break;
-
-          case "21":
-            bands.push(sides(y, x, up, "l_t"));
-            break;
-        }
-      }
-
-      return bands;
     }
 
     function inPoly(x, y, pol) {
@@ -835,67 +253,645 @@
       }
     }
 
-    function bezier(geometry) {
-      var out = [];
-      var newLine = [];
-      var closed = true;
+    function computeIsobands(grid, low, up) {
+      var interpolate = function interpolate(p1, p2, c) {
+        return p1 > c ? (c - p2) / (p1 - p2) : (c - p1) / (p2 - p1);
+      };
+      /* values of vertexes */
 
-      if (geometry[0][0] !== geometry[geometry.length - 1][0] || geometry[0][1] !== geometry[geometry.length - 1][1]) {
-        closed = false;
+
+      var A = function A(x, y) {
+        return grid[x + 1][y];
+      };
+
+      var B = function B(x, y) {
+        return grid[x + 1][y + 1];
+      };
+
+      var C = function C(x, y) {
+        return grid[x][y + 1];
+      };
+
+      var D = function D(x, y) {
+        return grid[x][y];
+      };
+      /* coordinates of points on edges */
+
+
+      var M = function M(x, y, c, h) {
+        return [x + 1, y + Math.abs(c - interpolate(A(x, y), B(x, y), h))];
+      };
+
+      var N = function N(x, y, c, h) {
+        return [x + Math.abs(c - interpolate(B(x, y), C(x, y), h)), y + 1];
+      };
+
+      var P = function P(x, y, c, h) {
+        return [x, y + Math.abs(c - interpolate(C(x, y), D(x, y), h))];
+      };
+
+      var Q = function Q(x, y, c, h) {
+        return [x + Math.abs(c - interpolate(D(x, y), A(x, y), h)), y];
+      };
+
+      var getTernaryCode = function getTernaryCode(a, b, c, d) {
+        var check = function check(v) {
+          return v < low ? '0' : v >= low && v < up ? '1' : '2';
+        };
+
+        return check(a) + check(b) + check(c) + check(d);
+      };
+      /* returns cells to be connected */
+
+
+      function edges(way, x, y, h) {
+        switch (way) {
+          case "a-":
+            return [].concat(_toConsumableArray(M(x, y, 0, h)), _toConsumableArray(Q(x, y, 1, h)));
+
+          case "b-":
+            return [].concat(_toConsumableArray(N(x, y, 1, h)), _toConsumableArray(M(x, y, 1, h)));
+
+          case "c-":
+            return [].concat(_toConsumableArray(P(x, y, 1, h)), _toConsumableArray(N(x, y, 0, h)));
+
+          case "d-":
+            return [].concat(_toConsumableArray(Q(x, y, 0, h)), _toConsumableArray(P(x, y, 0, h)));
+
+          case "a+":
+            return [].concat(_toConsumableArray(M(x, y, 1, h)), _toConsumableArray(Q(x, y, 0, h)));
+
+          case "b+":
+            return [].concat(_toConsumableArray(N(x, y, 0, h)), _toConsumableArray(M(x, y, 0, h)));
+
+          case "c+":
+            return [].concat(_toConsumableArray(P(x, y, 0, h)), _toConsumableArray(N(x, y, 1, h)));
+
+          case "d+":
+            return [].concat(_toConsumableArray(Q(x, y, 1, h)), _toConsumableArray(P(x, y, 1, h)));
+
+          case "l>r":
+            return [].concat(_toConsumableArray(M(x, y, 1, h)), _toConsumableArray(P(x, y, 1, h)));
+
+          case "r>l":
+            return [].concat(_toConsumableArray(M(x, y, 0, h)), _toConsumableArray(P(x, y, 0, h)));
+
+          case "t>b":
+            return [].concat(_toConsumableArray(N(x, y, 0, h)), _toConsumableArray(Q(x, y, 0, h)));
+
+          case "b>t":
+            return [].concat(_toConsumableArray(N(x, y, 1, h)), _toConsumableArray(Q(x, y, 1, h)));
+
+          default:
+            throw new Error('imposible');
+        }
       }
 
-      for (var i = 0; i < geometry.length; i++) {
-        var next = void 0,
-            prev = void 0;
+      function borderCheck(x, y) {
+        if (x !== 0 && y !== 0 && x !== grid.length - 2 && y !== grid[x].length - 2) return 0;else if (x === grid.length - 2 && y !== 0 && y !== grid[x].length - 2) return "top";else if (x !== grid.length - 2 && x !== 0 && y === grid[x].length - 2) return "right";else if (x === 0 && y !== grid[x].length - 2 && y !== 0) return "bot";else if (x !== grid.length - 2 && y === 0 && x !== 0) return "left";else if (x === grid.length - 2 && y === 0) return "A";else if (x === grid.length - 2 && y === grid[x].length - 2) return "B";else if (x === 0 && y === grid[x].length - 2) return "C";else if (x === 0 && y === 0) return "D";else throw new Error('invalid x or y');
+      }
 
-        if (i === 0) {
-          if (closed) {
-            next = geometry[i + 1];
-            prev = geometry[geometry.length - 2];
-          } else {
-            next = geometry[i + 1];
-            prev = geometry[i];
-          }
-        } else if (i === geometry.length - 1) {
-          if (closed) {
-            out.push([out[0][0], out[0][1]]);
+      function getCenterOfCell(x, y) {
+        var O = (A(x, y) + B(x, y) + C(x, y) + D(x, y)) / 4;
+        return O < low ? 0 : O >= low && O < up ? 1 : 2;
+      }
+
+      function insideContouring(code, x, y) {
+        var o;
+
+        switch (code) {
+          /* single triangle */
+          case "2221":
+            isobands.push(edges("d-", x, y, up));
             break;
-          } else {
-            next = geometry[i];
-            prev = geometry[i - 1];
+
+          case "1112":
+            isobands.push(edges("d+", x, y, up));
+            break;
+
+          case "0001":
+            isobands.push(edges("d+", x, y, low));
+            break;
+
+          case "1110":
+            isobands.push(edges("d-", x, y, low));
+            break;
+
+          case "2212":
+            isobands.push(edges("c-", x, y, up));
+            break;
+
+          case "1121":
+            isobands.push(edges("c+", x, y, up));
+            break;
+
+          case "0010":
+            isobands.push(edges("c+", x, y, low));
+            break;
+
+          case "1101":
+            isobands.push(edges("c-", x, y, low));
+            break;
+
+          case "2122":
+            isobands.push(edges("b-", x, y, up));
+            break;
+
+          case "1211":
+            isobands.push(edges("b+", x, y, up));
+            break;
+
+          case "0100":
+            isobands.push(edges("b+", x, y, low));
+            break;
+
+          case "1011":
+            isobands.push(edges("b-", x, y, low));
+            break;
+
+          case "1222":
+            isobands.push(edges("a-", x, y, up));
+            break;
+
+          case "2111":
+            isobands.push(edges("a+", x, y, up));
+            break;
+
+          case "1000":
+            isobands.push(edges("a+", x, y, low));
+            break;
+
+          case "0111":
+            isobands.push(edges("a-", x, y, low));
+            break;
+
+          /* single rectangle */
+
+          case "0011":
+            isobands.push(edges("b>t", x, y, low));
+            break;
+
+          case "1100":
+            isobands.push(edges("t>b", x, y, low));
+            break;
+
+          case "2211":
+            isobands.push(edges("t>b", x, y, up));
+            break;
+
+          case "1122":
+            isobands.push(edges("b>t", x, y, up));
+            break;
+
+          case "0110":
+            isobands.push(edges("r>l", x, y, low));
+            break;
+
+          case "1001":
+            isobands.push(edges("l>r", x, y, low));
+            break;
+
+          case "2112":
+            isobands.push(edges("l>r", x, y, up));
+            break;
+
+          case "1221":
+            isobands.push(edges("r>l", x, y, up));
+            break;
+
+          case "2200":
+            isobands.push(edges("t>b", x, y, up), edges("t>b", x, y, low));
+            break;
+
+          case "0022":
+            isobands.push(edges("b>t", x, y, up), edges("b>t", x, y, low));
+            break;
+
+          case "2002":
+            isobands.push(edges("l>r", x, y, up), edges("l>r", x, y, low));
+            break;
+
+          case "0220":
+            isobands.push(edges("r>l", x, y, up), edges("r>l", x, y, low));
+            break;
+
+          /* single trapezoid */
+
+          case "2220":
+            isobands.push(edges("d-", x, y, up), edges("d-", x, y, low));
+            break;
+
+          case "0002":
+            isobands.push(edges("d+", x, y, low), edges("d+", x, y, up));
+            break;
+
+          case "2202":
+            isobands.push(edges("c-", x, y, up), edges("c-", x, y, low));
+            break;
+
+          case "0020":
+            isobands.push(edges("c+", x, y, low), edges("c+", x, y, up));
+            break;
+
+          case "2022":
+            isobands.push(edges("b-", x, y, up), edges("b-", x, y, low));
+            break;
+
+          case "0200":
+            isobands.push(edges("b+", x, y, low), edges("b+", x, y, up));
+            break;
+
+          case "0222":
+            isobands.push(edges("a-", x, y, up), edges("a-", x, y, low));
+            break;
+
+          case "2000":
+            isobands.push(edges("a+", x, y, low), edges("a+", x, y, up));
+            break;
+
+          /*  single pentagon */
+
+          case "1200":
+            isobands.push(edges("b+", x, y, up), edges("t>b", x, y, low));
+            break;
+
+          case "0120":
+            isobands.push(edges("c+", x, y, up), edges("r>l", x, y, low));
+            break;
+
+          case "0012":
+            isobands.push(edges("d+", x, y, up), edges("b>t", x, y, low));
+            break;
+
+          case "2001":
+            isobands.push(edges("a+", x, y, up), edges("l>r", x, y, low));
+            break;
+
+          case "1022":
+            isobands.push(edges("b-", x, y, low), edges("b>t", x, y, up));
+            break;
+
+          case "2102":
+            isobands.push(edges("c-", x, y, low), edges("l>r", x, y, up));
+            break;
+
+          case "2210":
+            isobands.push(edges("d-", x, y, low), edges("t>b", x, y, up));
+            break;
+
+          case "0221":
+            isobands.push(edges("a-", x, y, low), edges("r>l", x, y, up));
+            break;
+
+          case "1002":
+            isobands.push(edges("d+", x, y, up), edges("l>r", x, y, low));
+            break;
+
+          case "2100":
+            isobands.push(edges("a+", x, y, up), edges("t>b", x, y, low));
+            break;
+
+          case "0210":
+            isobands.push(edges("b+", x, y, up), edges("r>l", x, y, low));
+            break;
+
+          case "0021":
+            isobands.push(edges("c+", x, y, up), edges("b>t", x, y, low));
+            break;
+
+          case "1220":
+            isobands.push(edges("d-", x, y, low), edges("r>l", x, y, up));
+            break;
+
+          case "0122":
+            isobands.push(edges("a-", x, y, low), edges("b>t", x, y, up));
+            break;
+
+          case "2012":
+            isobands.push(edges("b-", x, y, low), edges("l>r", x, y, up));
+            break;
+
+          case "2201":
+            isobands.push(edges("c-", x, y, low), edges("t>b", x, y, up));
+            break;
+
+          /* single hexagon */
+
+          case "0211":
+            isobands.push(edges("a-", x, y, low), edges("b+", x, y, up));
+            break;
+
+          case "2110":
+            isobands.push(edges("a+", x, y, up), edges("d-", x, y, low));
+            break;
+
+          case "1102":
+            isobands.push(edges("c-", x, y, low), edges("d+", x, y, up));
+            break;
+
+          case "1021":
+            isobands.push(edges("b-", x, y, low), edges("c+", x, y, up));
+            break;
+
+          case "2011":
+            isobands.push(edges("a+", x, y, up), edges("b-", x, y, low));
+            break;
+
+          case "0112":
+            isobands.push(edges("a-", x, y, low), edges("d+", x, y, up));
+            break;
+
+          case "1120":
+            isobands.push(edges("c+", x, y, up), edges("d-", x, y, low));
+            break;
+
+          case "1201":
+            isobands.push(edges("b+", x, y, up), edges("c-", x, y, low));
+            break;
+
+          case "2101":
+            isobands.push(edges("a+", x, y, up), edges("c-", x, y, low));
+            break;
+
+          case "0121":
+            isobands.push(edges("a-", x, y, low), edges("c+", x, y, up));
+            break;
+
+          case "1012":
+            isobands.push(edges("b-", x, y, low), edges("d+", x, y, up));
+            break;
+
+          case "1210":
+            isobands.push(edges("b+", x, y, up), edges("d-", x, y, low));
+            break;
+
+          /* center */
+
+          case "2020":
+            o = getCenterOfCell(x, y);
+            if (o === 0) isobands.push(edges("a+", x, y, up), edges("a+", x, y, low), edges("c+", x, y, up), edges("c+", x, y, low));else if (o === 1) isobands.push(edges("a+", x, y, up), edges("b-", x, y, low), edges("c+", x, y, up), edges("d-", x, y, low));else if (o === 2) isobands.push(edges("b-", x, y, up), edges("b-", x, y, low), edges("d-", x, y, up), edges("d-", x, y, low));
+            break;
+
+          case "0202":
+            o = getCenterOfCell(x, y);
+            if (o === 0) isobands.push(edges("b+", x, y, up), edges("b+", x, y, low), edges("d+", x, y, up), edges("d+", x, y, low));else if (o === 1) isobands.push(edges("a-", x, y, low), edges("b+", x, y, up), edges("c-", x, y, low), edges("d+", x, y, up));else if (o === 2) isobands.push(edges("a-", x, y, up), edges("a-", x, y, low), edges("c-", x, y, up), edges("c-", x, y, low));
+            break;
+
+          case "0101":
+            o = getCenterOfCell(x, y);
+            if (o === 0) isobands.push(edges("b+", x, y, low), edges("d+", x, y, low));else if (o === 1) isobands.push(edges("a-", x, y, low), edges("c-", x, y, low));
+            break;
+
+          case "1010":
+            o = getCenterOfCell(x, y);
+            if (o === 0) isobands.push(edges("a+", x, y, low), edges("c+", x, y, low));else if (o === 1) isobands.push(edges("b-", x, y, low), edges("d-", x, y, low));
+            break;
+
+          case "2121":
+            o = getCenterOfCell(x, y);
+            if (o === 1) isobands.push(edges("a+", x, y, up), edges("c+", x, y, up));else if (o === 2) isobands.push(edges("b-", x, y, up), edges("d-", x, y, up));
+            break;
+
+          case "1212":
+            o = getCenterOfCell(x, y);
+            if (o === 1) isobands.push(edges("b+", x, y, up), edges("d+", x, y, up));else if (o === 2) isobands.push(edges("a-", x, y, up), edges("c-", x, y, up));
+            break;
+
+          case "2120":
+            o = getCenterOfCell(x, y);
+            if (o === 1) isobands.push(edges("a+", x, y, up), edges("c+", x, y, up), edges("d-", x, y, low));else if (o === 2) isobands.push(edges("b-", x, y, up), edges("d-", x, y, up), edges("d-", x, y, low));
+            break;
+
+          case "2021":
+            o = getCenterOfCell(x, y);
+            if (o === 1) isobands.push(edges("a+", x, y, up), edges("b-", x, y, low), edges("c+", x, y, up));else if (o === 2) isobands.push(edges("b-", x, y, up), edges("b-", x, y, low), edges("d-", x, y, up));
+            break;
+
+          case "1202":
+            o = getCenterOfCell(x, y);
+            if (o === 1) isobands.push(edges("b+", x, y, up), edges("c-", x, y, low), edges("d+", x, y, up));else if (o === 2) isobands.push(edges("a-", x, y, up), edges("c-", x, y, up), edges("c-", x, y, low));
+            break;
+
+          case "0212":
+            o = getCenterOfCell(x, y);
+            if (o === 1) isobands.push(edges("a-", x, y, low), edges("b+", x, y, up), edges("d+", x, y, up));else if (o === 2) isobands.push(edges("a-", x, y, up), edges("a-", x, y, low), edges("c-", x, y, up));
+            break;
+
+          case "0102":
+            o = getCenterOfCell(x, y);
+            if (o === 0) isobands.push(edges("b+", x, y, low), edges("d+", x, y, up), edges("d+", x, y, low));else if (o === 1) isobands.push(edges("a-", x, y, low), edges("c-", x, y, low), edges("d+", x, y, up));
+            break;
+
+          case "0201":
+            o = getCenterOfCell(x, y);
+            if (o === 0) isobands.push(edges("b+", x, y, up), edges("b+", x, y, low), edges("d+", x, y, low));else if (o === 1) isobands.push(edges("a-", x, y, low), edges("b+", x, y, up), edges("c-", x, y, low));
+            break;
+
+          case "1020":
+            o = getCenterOfCell(x, y);
+            if (o === 0) isobands.push(edges("a+", x, y, low), edges("c+", x, y, up), edges("c+", x, y, low));else if (o === 1) isobands.push(edges("b-", x, y, low), edges("c+", x, y, up), edges("d-", x, y, low));
+            break;
+
+          case "2010":
+            o = getCenterOfCell(x, y);
+            if (o === 0) isobands.push(edges("a+", x, y, up), edges("a+", x, y, low), edges("c+", x, y, low));else if (o === 1) isobands.push(edges("a+", x, y, up), edges("b-", x, y, low), edges("d-", x, y, low));
+            break;
+        }
+      }
+
+      function outsideContouring(code, x, y, side) {
+        var tmp;
+
+        switch (side) {
+          case "top":
+            tmp = top(code[0] + code[1]);
+            if (tmp) isobands.push(tmp);
+            break;
+
+          case "right":
+            tmp = right(code[1] + code[2]);
+            if (tmp) isobands.push(tmp);
+            break;
+
+          case "bot":
+            tmp = bot(code[2] + code[3]);
+            if (tmp) isobands.push(tmp);
+            break;
+
+          case "left":
+            tmp = left(code[3] + code[0]);
+            if (tmp) isobands.push(tmp);
+            break;
+
+          case "A":
+            tmp = left(code[3] + code[0]);
+            if (tmp) isobands.push(tmp);
+            tmp = top(code[0] + code[1]);
+            if (tmp) isobands.push(tmp);
+            break;
+
+          case "B":
+            tmp = top(code[0] + code[1]);
+            if (tmp) isobands.push(tmp);
+            tmp = right(code[1] + code[2]);
+            if (tmp) isobands.push(tmp);
+            break;
+
+          case "C":
+            tmp = right(code[1] + code[2]);
+            if (tmp) isobands.push(tmp);
+            tmp = bot(code[2] + code[3]);
+            if (tmp) isobands.push(tmp);
+            break;
+
+          case "D":
+            tmp = bot(code[2] + code[3]);
+            if (tmp) isobands.push(tmp);
+            tmp = left(code[3] + code[0]);
+            if (tmp) isobands.push(tmp);
+            break;
+        }
+
+        function top(code) {
+          switch (code) {
+            case '01':
+              return [].concat(_toConsumableArray(M(x, y, 0, low)), [x + 1, y + 1]);
+
+            case '02':
+              return [].concat(_toConsumableArray(M(x, y, 0, low)), _toConsumableArray(M(x, y, 0, up)));
+
+            case '10':
+              return [].concat(_toConsumableArray(M(x, y, 1, low)), [x + 1, y]);
+
+            case '11':
+              return [x + 1, y, x + 1, y + 1];
+
+            case '12':
+              return [].concat(_toConsumableArray(M(x, y, 0, up)), [x + 1, y]);
+
+            case '20':
+              return [].concat(_toConsumableArray(M(x, y, 1, low)), _toConsumableArray(M(x, y, 1, up)));
+
+            case '21':
+              return [].concat(_toConsumableArray(M(x, y, 1, up)), [x + 1, y + 1]);
+
+            default:
+              return false;
           }
-        } else {
-          next = geometry[i + 1];
-          prev = geometry[i - 1];
         }
 
-        var vector = [(next[0] - prev[0]) / 2, (next[1] - prev[1]) / 2];
-        var refP1 = [geometry[i][0] - vector[0] / 3, geometry[i][1] - vector[1] / 3];
-        var refP2 = [geometry[i][0] + vector[0] / 3, geometry[i][1] + vector[1] / 3];
-        out.push([refP1, refP2]);
-      }
+        function right(code) {
+          switch (code) {
+            case '01':
+              return [].concat(_toConsumableArray(N(x, y, 1, low)), [x, y + 1]);
 
-      var deb = [];
+            case '02':
+              return [].concat(_toConsumableArray(N(x, y, 1, low)), _toConsumableArray(N(x, y, 1, up)));
 
-      for (var _i = 0; _i < geometry.length - 1; _i++) {
-        deb.push([geometry[_i], out[_i][1], out[_i + 1][0], geometry[_i + 1]]);
+            case '10':
+              return [].concat(_toConsumableArray(N(x, y, 0, low)), [x + 1, y + 1]);
 
-        for (var t = 0; t < 1; t += .1) {
-          var _long = Math.pow(1 - t, 3) * geometry[_i][0] + 3 * Math.pow(1 - t, 2) * t * out[_i][1][0] + 3 * (1 - t) * Math.pow(t, 2) * out[_i + 1][0][0] + Math.pow(t, 3) * geometry[_i + 1][0];
+            case '11':
+              return [x + 1, y + 1, x, y + 1];
 
-          var lat = Math.pow(1 - t, 3) * geometry[_i][1] + 3 * Math.pow(1 - t, 2) * t * out[_i][1][1] + 3 * (1 - t) * Math.pow(t, 2) * out[_i + 1][0][1] + Math.pow(t, 3) * geometry[_i + 1][1];
+            case '12':
+              return [].concat(_toConsumableArray(N(x, y, 1, up)), [x + 1, y + 1]);
 
-          newLine.push([_long, lat]);
+            case '20':
+              return [].concat(_toConsumableArray(N(x, y, 0, low)), _toConsumableArray(N(x, y, 0, up)));
+
+            case '21':
+              return [].concat(_toConsumableArray(N(x, y, 0, up)), [x, y + 1]);
+
+            default:
+              return false;
+          }
+        }
+
+        function bot(code) {
+          switch (code) {
+            case '01':
+              return [].concat(_toConsumableArray(P(x, y, 1, low)), [x, y]);
+
+            case '02':
+              return [].concat(_toConsumableArray(P(x, y, 1, low)), _toConsumableArray(P(x, y, 1, up)));
+
+            case '10':
+              return [].concat(_toConsumableArray(P(x, y, 0, low)), [x, y + 1]);
+
+            case '11':
+              return [x, y + 1, x, y];
+
+            case '12':
+              return [].concat(_toConsumableArray(P(x, y, 1, up)), [x, y + 1]);
+
+            case '20':
+              return [].concat(_toConsumableArray(P(x, y, 0, low)), _toConsumableArray(P(x, y, 0, up)));
+
+            case '21':
+              return [].concat(_toConsumableArray(P(x, y, 0, up)), [x, y]);
+
+            default:
+              return false;
+          }
+        }
+
+        function left(code) {
+          switch (code) {
+            case '01':
+              return [].concat(_toConsumableArray(Q(x, y, 0, low)), [x + 1, y]);
+
+            case '02':
+              return [].concat(_toConsumableArray(Q(x, y, 0, low)), _toConsumableArray(Q(x, y, 0, up)));
+
+            case '10':
+              return [].concat(_toConsumableArray(Q(x, y, 1, low)), [x, y]);
+
+            case '11':
+              return [x, y, x + 1, y];
+
+            case '12':
+              return [].concat(_toConsumableArray(Q(x, y, 0, up)), [x, y]);
+
+            case '20':
+              return [].concat(_toConsumableArray(Q(x, y, 1, low)), _toConsumableArray(Q(x, y, 1, up)));
+
+            case '21':
+              return [].concat(_toConsumableArray(Q(x, y, 1, up)), [x + 1, y]);
+
+            default:
+              return false;
+          }
         }
       }
 
-      return newLine;
+      var isobands = [];
+      /* walk on the grid and computing conture */
+
+      for (var i = 0, len = grid.length - 1; i < len; i++) {
+        for (var j = 0, len1 = grid[i].length - 1; j < len1; j++) {
+          var ternaryCode = getTernaryCode(A(i, j), B(i, j), C(i, j), D(i, j));
+
+          if (ternaryCode === '0000' || ternaryCode === '2222') {
+            continue;
+          }
+
+          if (ternaryCode !== '1111') {
+            insideContouring(ternaryCode, i, j);
+          }
+
+          var border = borderCheck(i, j);
+
+          if (border) {
+            outsideContouring(ternaryCode, i, j, border);
+          }
+        }
+      }
+
+      return isobands;
     }
 
     function drawIsobands(Grid, Step, DeltaLat, DeltaLong, Grid_Min_Lat, Grid_Min_Long, Dot_Max_Z, Dot_Min_Z) {
-      // четность/нечетность маски (чтобы не вылететь за пределы)
-      var LongFinish = Grid[0].length % 2 === 0 ? 1 : 0,
-          LatFinish = Grid.length % 2 === 0 ? 1 : 0;
       var GeoJson = {
         "type": "FeatureCollection",
         "features": []
@@ -905,17 +901,17 @@
       var Steps = stepOption(Step, Dot_Max_Z, Dot_Min_Z);
       var lower_h = Steps[0],
           upper_h = Infinity;
-      Bands.push(getIsolines(findIsobands(Grid, lower_h, upper_h, LongFinish, LatFinish), Grid[0].length - 0.5, Grid.length - 0.5));
+      Bands.push(getIsolines(computeIsobands(Grid, lower_h, upper_h)));
       BandsValue.push("more than " + Steps[0]);
 
       for (var i = 0; i < Steps.length - 1; i++) {
         lower_h = Steps[i + 1], upper_h = Steps[i];
-        Bands.push(getIsolines(findIsobands(Grid, lower_h, upper_h, LongFinish, LatFinish), Grid[0].length - 0.5, Grid.length - 0.5));
+        Bands.push(getIsolines(computeIsobands(Grid, lower_h, upper_h)));
         BandsValue.push(upper_h);
       }
 
       lower_h = -Infinity, upper_h = Steps[Steps.length - 1];
-      Bands.push(getIsolines(findIsobands(Grid, lower_h, upper_h, LongFinish, LatFinish), Grid[0].length - 0.5, Grid.length - 0.5));
+      Bands.push(getIsolines(computeIsobands(Grid, lower_h, upper_h)));
       BandsValue.push("less than " + Steps[Steps.length - 1]);
       var newBands = [];
       var minlatbb = Infinity,
@@ -947,40 +943,14 @@
       }
 
       for (var _i2 = 0; _i2 < newBands.length; _i2++) {
-        chache.push([]);
-      }
-
-      for (var _i3 = 0; _i3 < newBands.length; _i3++) {
-        /* for (let j = 0; j < newBands[i].length; j++) {
-              const dividedBands = divideBands(newBands[i][j], bbox);
-              if (i > 0) {
-                if (chache[i - 1].length > 0) {
-                    chacheCheck(dividedBands, chache[i - 1])
-                }
-            }
-              dividedBands.forEach((line, idx) => {
-                if (line.length > 1) {
-                    if (line[line.length - 1] === 'from chache') {
-                        line.splice(line.length - 1, 1);
-                    } else {
-                        dividedBands[idx] = [...bezier(simplify(line, (DeltaLong) / 50000))]
-                        chache[i].push([...dividedBands[idx]])
-                    }
-                }
-            })
-              newBands[i][j] = []
-            dividedBands.forEach(line => {
-                newBands[i][j].push(...line);
-            })
-        } */
         GeoJson.features.push({
           "type": "Feature",
           "properties": {
-            "value": BandsValue[_i3]
+            "value": BandsValue[_i2]
           },
           "geometry": {
             "type": "MultiPolygon",
-            "coordinates": compareBands(newBands[_i3])
+            "coordinates": compareBands(newBands[_i2])
           }
         });
       }
@@ -1103,6 +1073,18 @@
         return [x + Math.abs(c - interpolate(D(x, y), A(x, y))), y];
       };
 
+      var center = function center(x, y) {
+        return (A(x, y) + B(x, y) + C(x, y) + D(x, y)) / 4 <= h ? 0 : 1;
+      };
+
+      var getTernaryCode = function getTernaryCode(a, b, c, d) {
+        var check = function check(v) {
+          return v <= h ? "0" : "1";
+        };
+
+        return check(a) + check(b) + check(c) + check(d);
+      };
+
       function edges(way, x, y) {
         switch (way) {
           case "a-":
@@ -1151,20 +1133,11 @@
 
       for (var i = 0, len = grid.length - 1; i < len; i++) {
         for (var j = 0, len1 = grid[i].length - 1; j < len1; j++) {
-          var _a = grid[i + 1][j] <= h ? "0" : "1",
-              _b = grid[i + 1][j + 1] <= h ? "0" : "1",
-              _c = grid[i][j + 1] <= h ? "0" : "1",
-              _d = grid[i][j] <= h ? "0" : "1";
-
-          contour(_a + _b + _c + _d, i, j);
+          contouring(getTernaryCode(A(i, j), B(i, j), C(i, j), D(i, j)), i, j);
         }
       }
 
-      var center = function center(x, y) {
-        return (A(x, y) + B(x, y) + C(x, y) + D(x, y)) / 4 <= h ? 0 : 1;
-      };
-
-      function contour(val, x, y) {
+      function contouring(val, x, y) {
         if (val === "0000" || val === "1111") return;
         var o;
 
@@ -1234,10 +1207,7 @@
 
     function drawIsolines(Grid, Step, DeltaLat, DeltaLong, Grid_Min_Lat, Grid_Min_Long, Dot_Max_Z, Dot_Min_Z) {
       var Isolines = [];
-      var IsolinesValue = []; // четность/нечетность маски (чтобы не вылететь за пределы)
-
-      var LongFinish = Grid[0].length % 2 === 0 ? 1 : 0,
-          LatFinish = Grid.length % 2 === 0 ? 1 : 0;
+      var IsolinesValue = [];
       var GeoJson = {
         "type": "FeatureCollection",
         "features": []
@@ -1247,7 +1217,6 @@
 
       for (var i = 0; i < Steps.length; i++) {
         h = Steps[i];
-        console.log('----' + h + '----');
         Isolines.push(getIsolines(computeIsolines(Grid, h)));
         IsolinesValue.push(h);
       }
@@ -1437,7 +1406,6 @@
 
         for (var i = 0; i < latSize; i++) {
           Grid[i] = [];
-          /*  start = i % 2 === 0 ? 0 : 1; */
 
           var _loop2 = function _loop2(j) {
             var cellCenter = [bbox[1] + (i + 0.5) * degreeLatCellSize, bbox[0] + (j + 0.5) * degreeLongCellSize];
@@ -1451,9 +1419,7 @@
             Grid[i][j] = top / bot;
           };
 
-          for (var j = 0
-          /* start */
-          ; j < longSize; j += 1) {
+          for (var j = 0; j < longSize; j++) {
             _loop2(j);
           }
         }
@@ -1563,6 +1529,63 @@
       var neLong = maxLong + (newLong - _long) / 2;
       var neLat = maxLat + (newLat - lat) / 2;
       return [swLong, swLat, neLong, neLat];
+    }
+
+    function bezier(geometry) {
+      var out = [];
+      var newLine = [];
+      var closed = true;
+
+      if (geometry[0][0] !== geometry[geometry.length - 1][0] || geometry[0][1] !== geometry[geometry.length - 1][1]) {
+        closed = false;
+      }
+
+      for (var i = 0; i < geometry.length; i++) {
+        var next = void 0,
+            prev = void 0;
+
+        if (i === 0) {
+          if (closed) {
+            next = geometry[i + 1];
+            prev = geometry[geometry.length - 2];
+          } else {
+            next = geometry[i + 1];
+            prev = geometry[i];
+          }
+        } else if (i === geometry.length - 1) {
+          if (closed) {
+            out.push([out[0][0], out[0][1]]);
+            break;
+          } else {
+            next = geometry[i];
+            prev = geometry[i - 1];
+          }
+        } else {
+          next = geometry[i + 1];
+          prev = geometry[i - 1];
+        }
+
+        var vector = [(next[0] - prev[0]) / 2, (next[1] - prev[1]) / 2];
+        var refP1 = [geometry[i][0] - vector[0] / 3, geometry[i][1] - vector[1] / 3];
+        var refP2 = [geometry[i][0] + vector[0] / 3, geometry[i][1] + vector[1] / 3];
+        out.push([refP1, refP2]);
+      }
+
+      var deb = [];
+
+      for (var _i = 0; _i < geometry.length - 1; _i++) {
+        deb.push([geometry[_i], out[_i][1], out[_i + 1][0], geometry[_i + 1]]);
+
+        for (var t = 0; t < 1; t += .1) {
+          var _long = Math.pow(1 - t, 3) * geometry[_i][0] + 3 * Math.pow(1 - t, 2) * t * out[_i][1][0] + 3 * (1 - t) * Math.pow(t, 2) * out[_i + 1][0][0] + Math.pow(t, 3) * geometry[_i + 1][0];
+
+          var lat = Math.pow(1 - t, 3) * geometry[_i][1] + 3 * Math.pow(1 - t, 2) * t * out[_i][1][1] + 3 * (1 - t) * Math.pow(t, 2) * out[_i + 1][0][1] + Math.pow(t, 3) * geometry[_i + 1][1];
+
+          newLine.push([_long, lat]);
+        }
+      }
+
+      return newLine;
     }
 
     exports.DrawGridWithExtrs = DrawGridWithExtrs;
