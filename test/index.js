@@ -55,22 +55,27 @@ const points = {
     "features": pointsFeatures
 }
 
-const gridSize = 50;
+const gridSize = 20;
 
 
 function drawTurf() {
 
     const options = { gridType: 'points', property: 'value', units: 'meters', weight: 2 };
     console.time('interpolateTruf')
-    const grid = turf.interpolate(points, gridSize, options);
+    // const grid = turf.interpolate(points, gridSize, options);
     console.timeEnd('interpolateTruf')
+
+    // console.log(grid);
 
 
     const breaks = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 
     console.time('isobandturf')
-    const lines = turf.isobands(grid, breaks, { zProperty: 'value' });
+    const lines = turf.isobands(pgrid, breaks, { zProperty: 'value' });
     console.timeEnd('isobandturf')
+
+    console.log(lines);
+
 
     const colorsTurf = {
         "0-1": "#530FAD",
@@ -94,6 +99,10 @@ function drawTurf() {
     lines.features.forEach(feature => {
         L.geoJSON(feature, { color: colorsTurf[feature.properties.value], weight: 0, fillOpacity: .6, type: "band" }).bindPopup(feature.properties.value.toString()).addTo(map);
     });
+
+   /*  pgrid.features.forEach((feature, i) => {
+        L.geoJSON(feature, { type: "band" }).bindPopup(feature.properties.value.toString()).addTo(map);
+    }); */
 }
 
 function drawDline() {
@@ -103,14 +112,23 @@ function drawDline() {
     }
 
 
-    const extrs = [85.77, -61.99, 96.70, 75.07]
+    map.eachLayer(layer => {
+        if (layer.options.type === "band") {
+            map.removeLayer(layer)
+        }
+    })
 
 
     console.time('IDW')
     const IDW = dline.IDW(dots, gridSize / 2, { bbox: [0, 0], exponent: 2, units: ['meters', 'meters'] });
     console.timeEnd('IDW')
 
-    console.log(IDW);
+   /*  for (let i = 0; i < IDW.grid.length; i++) {
+        for (let j = 0; j < IDW.grid[i].length; j++) {
+            L.marker(([i * IDW.degreeLatCellSize + IDW.bbox[1], j * IDW.degreeLongCellSize + IDW.bbox[0]]), { type: "band" }).bindPopup(IDW.grid[i][j].toString()).addTo(map);
+        }
+
+    } */
 
 
     const lin = dline.DrawIsolinesWitchCustomGrid(IDW.grid, step, IDW.degreeLatCellSize, IDW.degreeLongCellSize, IDW.bbox[1], IDW.bbox[0], 11, 0)
@@ -118,11 +136,7 @@ function drawDline() {
     console.log(lin);
 
 
-    map.eachLayer(layer => {
-        if (layer.options.type === "band") {
-            map.removeLayer(layer)
-        }
-    })
+
     lin.features.forEach(feature => {
         L.geoJSON(feature, { type: "band" }).bindPopup(feature.properties.value.toString()).addTo(map);
     });
@@ -201,13 +215,20 @@ function drawDline() {
 
 }
 
+const pgrid = {
+    "type": "FeatureCollection"
+};
 
 function drawDlineBands() {
     step = {
         "type": "CustomValues",
         "values": [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
     }
-
+    map.eachLayer(layer => {
+        if (layer.options.type === "band") {
+            map.removeLayer(layer)
+        }
+    })
 
     const extrs = [85.77, -61.99, 96.70, 75.07]
 
@@ -216,11 +237,31 @@ function drawDlineBands() {
     const IDW = dline.IDW(dots, gridSize / 2, { bbox: [0, 0], exponent: 2, units: ['meters', 'meters'] });
     console.timeEnd('IDW')
 
-    map.eachLayer(layer => {
-        if (layer.options.type === "band") {
-            map.removeLayer(layer)
+    console.log(IDW);
+
+
+
+    pgrid.features = [];
+    for (let i = 0; i < IDW.grid.length; i++) {
+        for (let j = 0; j < IDW.grid[i].length; j++) {
+            if (IDW.grid[i][j]) {
+                pgrid.features.push({
+                    "type": "Feature",
+                    "properties": { "value": IDW.grid[i][j] },
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [j * IDW.degreeLongCellSize + IDW.bbox[0], i * IDW.degreeLatCellSize + IDW.bbox[1]]
+                    }
+                })
+                // L.marker(([i * IDW.degreeLatCellSize + IDW.bbox[1], j * IDW.degreeLongCellSize + IDW.bbox[0]]), { type: "band" }).bindPopup(IDW.grid[i][j].toString()).addTo(map);
+            }
         }
-    })
+
+    }
+
+    // console.log(pgrid);
+
+
 
     console.time('isobandsDline')
     const bands = dline.DrawIsobandsWithCustomGrid(IDW.grid, step, IDW.degreeLatCellSize, IDW.degreeLongCellSize, IDW.bbox[1], IDW.bbox[0], 11, 0)
@@ -243,11 +284,11 @@ function drawDlineBands() {
         "more than 10": "#FF0000",
     };
 
-    map.eachLayer(layer => {
-        if (layer.options.type === "band") {
-            map.removeLayer(layer)
-        }
-    })
+    /*   map.eachLayer(layer => {
+          if (layer.options.type === "band") {
+              map.removeLayer(layer)
+          }
+      }) */
     bands.GeoJson.features.forEach(feature => {
         L.geoJSON(feature, { color: colors[feature.properties.value], weight: 0, fillOpacity: 1, type: "band" }).bindPopup(feature.properties.value.toString()).addTo(map);
     });

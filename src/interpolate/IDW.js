@@ -49,8 +49,8 @@ function IDW(points, cellSize, options = {}) {
         for (let i = 0; i < latSize; i++) {
             Grid[i] = [];
 
-            start = i % 2 === 0 ? 0 : 1;
-            for (let j = start; j < longSize; j += 2) {
+           /*  start = i % 2 === 0 ? 0 : 1; */
+            for (let j = 0/* start */; j < longSize; j += 1) {
 
                 const cellCenter = [bbox[1] + (i + 0.5) * degreeLatCellSize, bbox[0] + (j + 0.5) * degreeLongCellSize];
 

@@ -129,28 +129,20 @@
 
     /* из пар точек делает последовательность */
 
-    function getCentroid(d1, d2) {
-      var x = (d1[0] + d2[0]) / 2;
-      var y = (d1[1] + d2[1]) / 2;
-      return [x, y];
-    }
-
     function getIsolines(RawIsolines, longMax, latMax) {
       var TempIsolines = [];
-      var dualInterpolate = [];
       var End_Isoline = true;
 
       while (RawIsolines.length > 0) {
         if (End_Isoline === true) {
           TempIsolines.push([]);
-          dualInterpolate.push([]);
           TempIsolines[TempIsolines.length - 1].push([RawIsolines[0][0], RawIsolines[0][1]], [RawIsolines[0][2], RawIsolines[0][3]]);
-
-          if (RawIsolines[0][0] === 0.5 || RawIsolines[0][1] === 0.5 || RawIsolines[0][2] === 0.5 || RawIsolines[0][3] === 0.5 || RawIsolines[0][0] === latMax || RawIsolines[0][1] === longMax || RawIsolines[0][2] === latMax || RawIsolines[0][3] === longMax) {
-            dualInterpolate[dualInterpolate.length - 1].push([RawIsolines[0][0], RawIsolines[0][1]], [RawIsolines[0][2], RawIsolines[0][3]]);
+          /* if (RawIsolines[0][0] === 0.5 || RawIsolines[0][1] === 0.5 || RawIsolines[0][2] === 0.5 || RawIsolines[0][3] === 0.5 ||
+              RawIsolines[0][0] === latMax || RawIsolines[0][1] === longMax || RawIsolines[0][2] === latMax || RawIsolines[0][3] === longMax) {
+              dualInterpolate[dualInterpolate.length - 1].push([RawIsolines[0][0], RawIsolines[0][1]], [RawIsolines[0][2], RawIsolines[0][3]]);
           } else {
-            dualInterpolate[dualInterpolate.length - 1].push(getCentroid([RawIsolines[0][0], RawIsolines[0][1]], [RawIsolines[0][2], RawIsolines[0][3]]));
-          }
+              dualInterpolate[dualInterpolate.length - 1].push(getCentroid([RawIsolines[0][0], RawIsolines[0][1]], [RawIsolines[0][2], RawIsolines[0][3]]))
+          } */
 
           RawIsolines.splice(0, 1);
         }
@@ -160,24 +152,24 @@
         for (var i = 0, len = RawIsolines.length; i < len; i++) {
           if (TempIsolines[TempIsolines.length - 1][TempIsolines[TempIsolines.length - 1].length - 1][0] === RawIsolines[i][0] && TempIsolines[TempIsolines.length - 1][TempIsolines[TempIsolines.length - 1].length - 1][1] === RawIsolines[i][1]) {
             TempIsolines[TempIsolines.length - 1].push([RawIsolines[i][2], RawIsolines[i][3]]);
-
-            if (RawIsolines[i][0] === 0.5 || RawIsolines[i][1] === 0.5 || RawIsolines[i][2] === 0.5 || RawIsolines[i][3] === 0.5 || RawIsolines[i][0] === latMax || RawIsolines[i][1] === longMax || RawIsolines[i][2] === latMax || RawIsolines[i][3] === longMax) {
-              dualInterpolate[dualInterpolate.length - 1].push([RawIsolines[i][2], RawIsolines[i][3]]);
+            /* if (RawIsolines[i][0] === 0.5 || RawIsolines[i][1] === 0.5 || RawIsolines[i][2] === 0.5 || RawIsolines[i][3] === 0.5 ||
+                RawIsolines[i][0] === latMax || RawIsolines[i][1] === longMax || RawIsolines[i][2] === latMax || RawIsolines[i][3] === longMax) {
+                dualInterpolate[dualInterpolate.length - 1].push([RawIsolines[i][2], RawIsolines[i][3]])
             } else {
-              dualInterpolate[dualInterpolate.length - 1].push(getCentroid([RawIsolines[i][0], RawIsolines[i][1]], [RawIsolines[i][2], RawIsolines[i][3]]));
-            }
+                dualInterpolate[dualInterpolate.length - 1].push(getCentroid([RawIsolines[i][0], RawIsolines[i][1]], [RawIsolines[i][2], RawIsolines[i][3]]))
+            } */
 
             RawIsolines.splice(i, 1);
             End_Isoline = false;
             break;
           } else if (TempIsolines[TempIsolines.length - 1][TempIsolines[TempIsolines.length - 1].length - 1][0] === RawIsolines[i][2] && TempIsolines[TempIsolines.length - 1][TempIsolines[TempIsolines.length - 1].length - 1][1] === RawIsolines[i][3]) {
             TempIsolines[TempIsolines.length - 1].push([RawIsolines[i][0], RawIsolines[i][1]]);
-
-            if (RawIsolines[i][0] === 0.5 || RawIsolines[i][1] === 0.5 || RawIsolines[i][2] === 0.5 || RawIsolines[i][3] === 0.5 || RawIsolines[i][0] === latMax || RawIsolines[i][1] === longMax || RawIsolines[i][2] === latMax || RawIsolines[i][3] === longMax) {
-              dualInterpolate[dualInterpolate.length - 1].push([RawIsolines[i][0], RawIsolines[i][1]]);
+            /* if (RawIsolines[i][0] === 0.5 || RawIsolines[i][1] === 0.5 || RawIsolines[i][2] === 0.5 || RawIsolines[i][3] === 0.5 ||
+                RawIsolines[i][0] === latMax || RawIsolines[i][1] === longMax || RawIsolines[i][2] === latMax || RawIsolines[i][3] === longMax) {
+                dualInterpolate[dualInterpolate.length - 1].push([RawIsolines[i][0], RawIsolines[i][1]])
             } else {
-              dualInterpolate[dualInterpolate.length - 1].push(getCentroid([RawIsolines[i][0], RawIsolines[i][1]], [RawIsolines[i][2], RawIsolines[i][3]]));
-            }
+                dualInterpolate[dualInterpolate.length - 1].push(getCentroid([RawIsolines[i][0], RawIsolines[i][1]], [RawIsolines[i][2], RawIsolines[i][3]]))
+            } */
 
             RawIsolines.splice(i, 1);
             End_Isoline = false;
@@ -186,43 +178,46 @@
 
           if (TempIsolines[TempIsolines.length - 1][0][0] === RawIsolines[i][0] && TempIsolines[TempIsolines.length - 1][0][1] === RawIsolines[i][1]) {
             TempIsolines[TempIsolines.length - 1].unshift([RawIsolines[i][2], RawIsolines[i][3]]);
-
-            if (RawIsolines[i][0] === 0.5 || RawIsolines[i][1] === 0.5 || RawIsolines[i][2] === 0.5 || RawIsolines[i][3] === 0.5 || RawIsolines[i][0] === latMax || RawIsolines[i][1] === longMax || RawIsolines[i][2] === latMax || RawIsolines[i][3] === longMax) {
-              dualInterpolate[dualInterpolate.length - 1].unshift([RawIsolines[i][2], RawIsolines[i][3]]);
-            } else {
-              dualInterpolate[dualInterpolate.length - 1].unshift(getCentroid([RawIsolines[i][0], RawIsolines[i][1]], [RawIsolines[i][2], RawIsolines[i][3]]));
-            }
+            /*  if (RawIsolines[i][0] === 0.5 || RawIsolines[i][1] === 0.5 || RawIsolines[i][2] === 0.5 || RawIsolines[i][3] === 0.5 ||
+                 RawIsolines[i][0] === latMax || RawIsolines[i][1] === longMax || RawIsolines[i][2] === latMax || RawIsolines[i][3] === longMax) {
+                 dualInterpolate[dualInterpolate.length - 1].unshift([RawIsolines[i][2], RawIsolines[i][3]])
+             } else {
+                 dualInterpolate[dualInterpolate.length - 1].unshift(getCentroid([RawIsolines[i][0], RawIsolines[i][1]], [RawIsolines[i][2], RawIsolines[i][3]]))
+             } */
 
             RawIsolines.splice(i, 1);
             End_Isoline = false;
             break;
           } else if (TempIsolines[TempIsolines.length - 1][0][0] === RawIsolines[i][2] && TempIsolines[TempIsolines.length - 1][0][1] === RawIsolines[i][3]) {
             TempIsolines[TempIsolines.length - 1].unshift([RawIsolines[i][0], RawIsolines[i][1]]);
-
-            if (RawIsolines[i][0] === 0.5 || RawIsolines[i][1] === 0.5 || RawIsolines[i][2] === 0.5 || RawIsolines[i][3] === 0.5 || RawIsolines[i][0] === latMax || RawIsolines[i][1] === longMax || RawIsolines[i][2] === latMax || RawIsolines[i][3] === longMax) {
-              dualInterpolate[dualInterpolate.length - 1].unshift([RawIsolines[i][0], RawIsolines[i][1]]);
-            } else {
-              dualInterpolate[dualInterpolate.length - 1].unshift(getCentroid([RawIsolines[i][0], RawIsolines[i][1]], [RawIsolines[i][2], RawIsolines[i][3]]));
-            }
+            /*   if (RawIsolines[i][0] === 0.5 || RawIsolines[i][1] === 0.5 || RawIsolines[i][2] === 0.5 || RawIsolines[i][3] === 0.5 ||
+                  RawIsolines[i][0] === latMax || RawIsolines[i][1] === longMax || RawIsolines[i][2] === latMax || RawIsolines[i][3] === longMax) {
+                  dualInterpolate[dualInterpolate.length - 1].unshift([RawIsolines[i][0], RawIsolines[i][1]])
+              } else {
+                  dualInterpolate[dualInterpolate.length - 1].unshift(getCentroid([RawIsolines[i][0], RawIsolines[i][1]], [RawIsolines[i][2], RawIsolines[i][3]]))
+              }
+            */
 
             RawIsolines.splice(i, 1);
             End_Isoline = false;
             break;
           }
         }
+        /* if (End_Isoline) {
+            if (TempIsolines[TempIsolines.length - 1][0][0] === TempIsolines[TempIsolines.length - 1][TempIsolines[TempIsolines.length - 1].length - 1][0] &&
+                TempIsolines[TempIsolines.length - 1][0][1] === TempIsolines[TempIsolines.length - 1][TempIsolines[TempIsolines.length - 1].length - 1][1]) {
+                dualInterpolate[dualInterpolate.length - 1].push([dualInterpolate[dualInterpolate.length - 1][0][0], dualInterpolate[dualInterpolate.length - 1][0][1]])
+            }
+        } */
 
-        if (End_Isoline) {
-          if (TempIsolines[TempIsolines.length - 1][0][0] === TempIsolines[TempIsolines.length - 1][TempIsolines[TempIsolines.length - 1].length - 1][0] && TempIsolines[TempIsolines.length - 1][0][1] === TempIsolines[TempIsolines.length - 1][TempIsolines[TempIsolines.length - 1].length - 1][1]) {
-            dualInterpolate[dualInterpolate.length - 1].push([dualInterpolate[dualInterpolate.length - 1][0][0], dualInterpolate[dualInterpolate.length - 1][0][1]]);
-          }
-        }
       }
+      /*   if (TempIsolines[TempIsolines.length - 1][0][0] === TempIsolines[TempIsolines.length - 1][TempIsolines[TempIsolines.length - 1].length - 1][0] &&
+            TempIsolines[TempIsolines.length - 1][0][1] === TempIsolines[TempIsolines.length - 1][TempIsolines[TempIsolines.length - 1].length - 1][1]) {
+            dualInterpolate[dualInterpolate.length - 1].push([dualInterpolate[dualInterpolate.length - 1][0][0], dualInterpolate[dualInterpolate.length - 1][0][1]])
+        } */
 
-      if (TempIsolines[TempIsolines.length - 1][0][0] === TempIsolines[TempIsolines.length - 1][TempIsolines[TempIsolines.length - 1].length - 1][0] && TempIsolines[TempIsolines.length - 1][0][1] === TempIsolines[TempIsolines.length - 1][TempIsolines[TempIsolines.length - 1].length - 1][1]) {
-        dualInterpolate[dualInterpolate.length - 1].push([dualInterpolate[dualInterpolate.length - 1][0][0], dualInterpolate[dualInterpolate.length - 1][0][1]]);
-      }
 
-      return dualInterpolate;
+      return TempIsolines;
     }
 
     function findIsobands(Grid, low, up, LongFinish, LatFinish) {
@@ -1057,93 +1052,184 @@
       return Bands;
     }
 
-    function FindIsolines(Grid, h, LongFinish, LatFinish) {
-      var TempIsolines = [];
+    function computeIsolines(grid, h) {
+      var interpolate = function interpolate(p1, p2) {
+        return p1 > h ? (h - p2) / (p1 - p2) : (h - p1) / (p2 - p1);
+      };
+      /* 
+      .....................................................
+      .
+      A_____M_____B
+      |           |
+      |           |
+      Q     O     N
+      |           |
+      |___________|
+      D     P     C
+      .
+      .....................................................
+      */
 
-      var interpolate = function interpolate(f1, f2, c) {
-        return Math.abs(f2 - c) / (Math.abs(f2 - c) + Math.abs(c - f1));
+
+      var A = function A(x, y) {
+        return grid[x + 1][y];
       };
 
-      function cells(y, x, c, val) {
-        switch (val) {
-          case "a":
-            return [y + 1 + interpolate(Grid[y + 2][x], Grid[y][x], c), x + 0.5, y + 2.5, x + 1 + interpolate(Grid[y + 2][x + 2], Grid[y + 2][x], c)];
+      var B = function B(x, y) {
+        return grid[x + 1][y + 1];
+      };
 
-          case "b":
-            return [y + 2.5, x + 1 + interpolate(Grid[y + 2][x + 2], Grid[y + 2][x], c), y + 1 + interpolate(Grid[y + 2][x + 2], Grid[y][x + 2], c), x + 2.5];
+      var C = function C(x, y) {
+        return grid[x][y + 1];
+      };
 
-          case "c":
-            return [y + 1 + interpolate(Grid[y + 2][x + 2], Grid[y][x + 2], c), x + 2.5, y + 0.5, x + 1 + interpolate(Grid[y][x + 2], Grid[y][x], c)];
+      var D = function D(x, y) {
+        return grid[x][y];
+      };
 
-          case "d":
-            return [y + 1 + interpolate(Grid[y + 2][x], Grid[y][x], c), x + 0.5, y + 0.5, x + 1 + interpolate(Grid[y][x + 2], Grid[y][x], c)];
+      var M = function M(x, y, c) {
+        return [x + 1, y + Math.abs(c - interpolate(A(x, y), B(x, y)))];
+      };
 
-          case "v":
-            return [y + 2.5, x + 1 + interpolate(Grid[y + 2][x + 2], Grid[y + 2][x], c), y + 0.5, x + 1 + interpolate(Grid[y][x + 2], Grid[y][x], c)];
+      var N = function N(x, y, c) {
+        return [x + Math.abs(c - interpolate(B(x, y), C(x, y))), y + 1];
+      };
 
-          case "h":
-            return [y + 1 + interpolate(Grid[y + 2][x], Grid[y][x], c), x + 0.5, y + 1 + interpolate(Grid[y + 2][x + 2], Grid[y][x + 2], c), x + 2.5];
+      var P = function P(x, y, c) {
+        return [x, y + Math.abs(c - interpolate(C(x, y), D(x, y)))];
+      };
+
+      var Q = function Q(x, y, c) {
+        return [x + Math.abs(c - interpolate(D(x, y), A(x, y))), y];
+      };
+
+      function edges(way, x, y) {
+        switch (way) {
+          case "a-":
+            return [].concat(_toConsumableArray(M(x, y, 0)), _toConsumableArray(Q(x, y, 1)));
+
+          case "b-":
+            return [].concat(_toConsumableArray(N(x, y, 1)), _toConsumableArray(M(x, y, 1)));
+
+          case "c-":
+            return [].concat(_toConsumableArray(P(x, y, 1)), _toConsumableArray(N(x, y, 0)));
+
+          case "d-":
+            return [].concat(_toConsumableArray(Q(x, y, 0)), _toConsumableArray(P(x, y, 0)));
+
+          case "a+":
+            return [].concat(_toConsumableArray(M(x, y, 1)), _toConsumableArray(Q(x, y, 0)));
+
+          case "b+":
+            return [].concat(_toConsumableArray(N(x, y, 0)), _toConsumableArray(M(x, y, 0)));
+
+          case "c+":
+            return [].concat(_toConsumableArray(P(x, y, 0)), _toConsumableArray(N(x, y, 1)));
+
+          case "d+":
+            return [].concat(_toConsumableArray(Q(x, y, 1)), _toConsumableArray(P(x, y, 1)));
+
+          case "l>r":
+            return [].concat(_toConsumableArray(M(x, y, 1)), _toConsumableArray(P(x, y, 1)));
+
+          case "r>l":
+            return [].concat(_toConsumableArray(M(x, y, 0)), _toConsumableArray(P(x, y, 0)));
+
+          case "t>b":
+            return [].concat(_toConsumableArray(N(x, y, 0)), _toConsumableArray(Q(x, y, 0)));
+
+          case "b>t":
+            return [].concat(_toConsumableArray(N(x, y, 1)), _toConsumableArray(Q(x, y, 1)));
+
+          default:
+            console.error('wtf?');
+            break;
         }
       }
 
-      var a, b, c, d, e;
+      var isolines = [];
 
-      for (var i = 0, len = Grid.length - LatFinish - 2; i < len; i += 2) {
-        for (var j = 0, len1 = Grid[i].length - LongFinish - 2; j < len1; j += 2) {
-          a = Grid[i + 2][j] <= h ? "0" : "1";
-          b = Grid[i + 2][j + 2] <= h ? "0" : "1";
-          c = Grid[i][j + 2] <= h ? "0" : "1";
-          d = Grid[i][j] <= h ? "0" : "1";
-          e = Grid[i + 1][j + 1] <= h ? 0 : 1;
-          cells_calculate(a + b + c + d, i, j);
+      for (var i = 0, len = grid.length - 1; i < len; i++) {
+        for (var j = 0, len1 = grid[i].length - 1; j < len1; j++) {
+          var _a = grid[i + 1][j] <= h ? "0" : "1",
+              _b = grid[i + 1][j + 1] <= h ? "0" : "1",
+              _c = grid[i][j + 1] <= h ? "0" : "1",
+              _d = grid[i][j] <= h ? "0" : "1";
+
+          contour(_a + _b + _c + _d, i, j);
         }
       }
 
-      function cells_calculate(val, y, x) {
+      var center = function center(x, y) {
+        return (A(x, y) + B(x, y) + C(x, y) + D(x, y)) / 4 <= h ? 0 : 1;
+      };
+
+      function contour(val, x, y) {
         if (val === "0000" || val === "1111") return;
+        var o;
 
         switch (val) {
           case "1110":
+            isolines.push(edges("d-", x, y));
+            break;
+
           case "0001":
-            TempIsolines.push(cells(y, x, h, "d"));
+            isolines.push(edges("d+", x, y));
             break;
 
           case "1101":
+            isolines.push(edges("c-", x, y));
+            break;
+
           case "0010":
-            TempIsolines.push(cells(y, x, h, "c"));
+            isolines.push(edges("c+", x, y));
             break;
 
           case "1011":
+            isolines.push(edges("b-", x, y));
+            break;
+
           case "0100":
-            TempIsolines.push(cells(y, x, h, "b"));
+            isolines.push(edges("b+", x, y));
             break;
 
           case "0111":
+            isolines.push(edges("a-", x, y));
+            break;
+
           case "1000":
-            TempIsolines.push(cells(y, x, h, "a"));
+            isolines.push(edges("a+", x, y));
             break;
 
           case "1100":
+            isolines.push(edges("t>b", x, y));
+            break;
+
           case "0011":
-            TempIsolines.push(cells(y, x, h, "h"));
+            isolines.push(edges("b>t", x, y));
             break;
 
           case "1001":
+            isolines.push(edges("l>r", x, y));
+            break;
+
           case "0110":
-            TempIsolines.push(cells(y, x, h, "v"));
+            isolines.push(edges("r>l", x, y));
             break;
 
           case "1010":
-            if (e === 0) TempIsolines.push(cells(y, x, h, "a"), cells(y, x, h, "c"));else if (e === 1) TempIsolines.push(cells(y, x, h, "b"), cells(y, x, h, "d"));
+            o = center(x, y);
+            if (o === 0) isolines.push(edges("a+", x, y), edges("c+", x, y));else if (o === 1) isolines.push(edges("b-", x, y), edges("d-", x, y));
             break;
 
           case "0101":
-            if (e === 0) TempIsolines.push(cells(y, x, h, "b"), cells(y, x, h, "d"));else if (e === 1) TempIsolines.push(cells(y, x, h, "a"), cells(y, x, h, "c"));
+            o = center(x, y);
+            if (o === 0) isolines.push(edges("b+", x, y), edges("d+", x, y));else if (o === 1) isolines.push(edges("a-", x, y), edges("c-", x, y));
             break;
         }
       }
 
-      return TempIsolines;
+      return isolines;
     }
 
     function drawIsolines(Grid, Step, DeltaLat, DeltaLong, Grid_Min_Lat, Grid_Min_Long, Dot_Max_Z, Dot_Min_Z) {
@@ -1162,7 +1248,7 @@
       for (var i = 0; i < Steps.length; i++) {
         h = Steps[i];
         console.log('----' + h + '----');
-        Isolines.push(getIsolines(FindIsolines(Grid, h, LongFinish, LatFinish)));
+        Isolines.push(getIsolines(computeIsolines(Grid, h)));
         IsolinesValue.push(h);
       }
 
@@ -1348,11 +1434,10 @@
 
       function calcInMeters() {
         var Grid = [];
-        var start;
 
         for (var i = 0; i < latSize; i++) {
           Grid[i] = [];
-          start = i % 2 === 0 ? 0 : 1;
+          /*  start = i % 2 === 0 ? 0 : 1; */
 
           var _loop2 = function _loop2(j) {
             var cellCenter = [bbox[1] + (i + 0.5) * degreeLatCellSize, bbox[0] + (j + 0.5) * degreeLongCellSize];
@@ -1366,7 +1451,9 @@
             Grid[i][j] = top / bot;
           };
 
-          for (var j = start; j < longSize; j += 2) {
+          for (var j = 0
+          /* start */
+          ; j < longSize; j += 1) {
             _loop2(j);
           }
         }

@@ -1,6 +1,6 @@
 function FindIsolines(Grid, h, LongFinish, LatFinish) {
     const TempIsolines = [];
-    const interpolate = (f1, f2, c) => Math.abs(f2 - c) / (Math.abs(f2 - c) + Math.abs(c - f1));
+    const interpolate = (f1, f2, c) => (c - f2) / (f1 - f2);
 
     function cells(y, x, c, val) {
 

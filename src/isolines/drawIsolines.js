@@ -1,6 +1,7 @@
 import { getIsolines } from '../common/getIsolines';
 import { FindIsolines } from './FindIsolines';
 import { stepOption } from '../common/stepOption';
+import computeIsolines from './computeIsolines';
 
 
 function drawIsolines(Grid, Step, DeltaLat, DeltaLong, Grid_Min_Lat, Grid_Min_Long, Dot_Max_Z, Dot_Min_Z) {
@@ -26,9 +27,11 @@ function drawIsolines(Grid, Step, DeltaLat, DeltaLong, Grid_Min_Lat, Grid_Min_Lo
         h = Steps[i];
         console.log('----' + h + '----');
 
-        Isolines.push(getIsolines(FindIsolines(Grid, h, LongFinish, LatFinish)));
+        Isolines.push(getIsolines(computeIsolines(Grid, h)));
         IsolinesValue.push(h);
     }
+
+    
 
     let thrid;
     for (let i = 0; i < Isolines.length; i++) {
