@@ -117,7 +117,7 @@ function drawDline() {
 
 
     console.time('IDW')
-    const IDW = dline.IDW(dots, gridSize, { bbox: [100, 100], exponent: 0.5, units: ['meters', 'degrees'] });
+    const IDW = dline.IDW(dots, gridSize, { bbox: [100, 100], exponent: 2, units: ['meters', 'degrees'] });
     console.timeEnd('IDW')
 
     console.time('dline isolines')
@@ -146,7 +146,7 @@ function drawDlineBands() {
     })
 
     console.time('IDW')
-    const IDW = dline.IDW(dots, gridSize, { bbox: [100, 100], exponent: 0.5, units: ['meters', 'degrees'] });
+    const IDW = dline.IDW(dots, gridSize, { bbox: [0, 0], exponent: 2, units: ['meters', 'meters'] });
     console.timeEnd('IDW')
 
 

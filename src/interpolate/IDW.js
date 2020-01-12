@@ -32,8 +32,8 @@ function IDW(points, cellSize, options = {}) {
                 let top = 0, bot = 0;
                 _points.forEach(point => {
                     const d = ((cellCenter[0] - point[0]) ** 2 + (cellCenter[1] - point[1]) ** 2) ** 2;
-                    top += point[2] / d ** exponent;
-                    bot += 1 / d ** exponent;
+                    top += point[2] / d ** (1 / exponent);
+                    bot += 1 / d ** (1 / exponent);
                 })
                 Grid[i][j] = top / bot;
             }
@@ -46,7 +46,7 @@ function IDW(points, cellSize, options = {}) {
 
         for (let i = 0; i < latSize; i++) {
             Grid[i] = [];
-            for (let j = 0; j < longSize; j ++) {
+            for (let j = 0; j < longSize; j++) {
 
                 const cellCenter = [bbox[1] + (i + 0.5) * degreeLatCellSize, bbox[0] + (j + 0.5) * degreeLongCellSize];
 

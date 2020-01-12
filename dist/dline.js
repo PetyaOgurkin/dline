@@ -1386,8 +1386,8 @@
 
             _points.forEach(function (point) {
               var d = Math.pow(Math.pow(cellCenter[0] - point[0], 2) + Math.pow(cellCenter[1] - point[1], 2), 2);
-              top += point[2] / Math.pow(d, exponent);
-              bot += 1 / Math.pow(d, exponent);
+              top += point[2] / Math.pow(d, 1 / exponent);
+              bot += 1 / Math.pow(d, 1 / exponent);
             });
 
             Grid[i][j] = top / bot;
