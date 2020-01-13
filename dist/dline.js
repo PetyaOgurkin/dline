@@ -1342,7 +1342,8 @@
       var _optionsParser = optionsParser(options, points),
           bbox = _optionsParser.bbox,
           units = _optionsParser.units,
-          exponent = _optionsParser.exponent;
+          exponent = _optionsParser.exponent,
+          barriers = _optionsParser.barriers;
 
       var _cellSizes = cellSizes(bbox, cellSize, units[0]),
           latSize = _cellSizes.latSize,
@@ -1376,25 +1377,65 @@
 
         var Grid = [];
 
-        for (var i = 0; i < latSize; i++) {
-          Grid[i] = [];
+        if (barriers) {
+          barriers.forEach(function (barrier) {
+            for (var i = 0; i < barrier.coordinates.length; i++) {
+              var tmp = Math.abs(bbox[1] - barrier.coordinates[i][1]) / degreeLatCellSize;
+              barrier.coordinates[i][1] = Math.abs(bbox[0] - barrier.coordinates[i][0]) / degreeLongCellSize;
+              barrier.coordinates[i][0] = tmp;
+            }
+          });
 
-          var _loop = function _loop(j) {
-            var cellCenter = [i + 0.5, j + 0.5];
-            var top = 0,
-                bot = 0;
+          for (var i = 0; i < latSize; i++) {
+            Grid[i] = [];
 
-            _points.forEach(function (point) {
-              var d = Math.pow(Math.pow(cellCenter[0] - point[0], 2) + Math.pow(cellCenter[1] - point[1], 2), 2);
-              top += point[2] / Math.pow(d, 1 / exponent);
-              bot += 1 / Math.pow(d, 1 / exponent);
-            });
+            var _loop = function _loop(j) {
+              var cellCenter = [i + 0.5, j + 0.5];
+              var top = 0,
+                  bot = 0;
 
-            Grid[i][j] = top / bot;
-          };
+              _points.forEach(function (point) {
+                var weight = 0;
+                barriers.forEach(function (barrier) {
+                  var tmpW = intersection(barrier, [point, cellCenter]);
 
-          for (var j = 0; j < longSize; j++) {
-            _loop(j);
+                  if (tmpW) {
+                    weight += tmpW;
+                  }
+                });
+                var d = Math.pow(Math.pow(cellCenter[0] - point[0], 2) + Math.pow(cellCenter[1] - point[1], 2), 2);
+                top += point[2] / Math.pow(d, exponent + weight);
+                bot += 1 / Math.pow(d, exponent + weight);
+              });
+
+              Grid[i][j] = top / bot;
+            };
+
+            for (var j = 0; j < longSize; j++) {
+              _loop(j);
+            }
+          }
+        } else {
+          for (var _i = 0; _i < latSize; _i++) {
+            Grid[_i] = [];
+
+            var _loop2 = function _loop2(_j) {
+              var cellCenter = [_i + 0.5, _j + 0.5];
+              var top = 0,
+                  bot = 0;
+
+              _points.forEach(function (point) {
+                var d = Math.pow(Math.pow(cellCenter[0] - point[0], 2) + Math.pow(cellCenter[1] - point[1], 2), 2);
+                top += point[2] / Math.pow(d, exponent);
+                bot += 1 / Math.pow(d, exponent);
+              });
+
+              Grid[_i][_j] = top / bot;
+            };
+
+            for (var _j = 0; _j < longSize; _j++) {
+              _loop2(_j);
+            }
           }
         }
 
@@ -1407,7 +1448,7 @@
         for (var i = 0; i < latSize; i++) {
           Grid[i] = [];
 
-          var _loop2 = function _loop2(j) {
+          var _loop3 = function _loop3(j) {
             var cellCenter = [bbox[1] + (i + 0.5) * degreeLatCellSize, bbox[0] + (j + 0.5) * degreeLongCellSize];
             var top = 0,
                 bot = 0;
@@ -1420,7 +1461,7 @@
           };
 
           for (var j = 0; j < longSize; j++) {
-            _loop2(j);
+            _loop3(j);
           }
         }
 
@@ -1431,7 +1472,8 @@
     function optionsParser(options, points) {
       var bbox = options.bbox,
           units = options.units,
-          exponent = options.exponent;
+          exponent = options.exponent,
+          barriers = options.barriers;
 
       switch (_typeof(bbox)) {
         case "undefined":
@@ -1492,10 +1534,21 @@
         throw new Error('Неккоректное значение exponent');
       }
 
+      if (barriers) {
+        barriers = barriers.features.map(function (barrier) {
+          return {
+            coordinates: barrier.geometry.coordinates,
+            left: barrier.properties.left,
+            right: barrier.properties.right
+          };
+        });
+      }
+
       return {
         bbox: bbox,
         units: units,
-        exponent: exponent
+        exponent: exponent,
+        barriers: barriers
       };
     }
 
@@ -1529,6 +1582,66 @@
       var neLong = maxLong + (newLong - _long) / 2;
       var neLat = maxLat + (newLat - lat) / 2;
       return [swLong, swLat, neLong, neLat];
+    }
+
+    function intersection(barrier, segment) {
+      var getVector = function getVector(p1, p2) {
+        return [p2[0] - p1[0], p2[1] - p1[1]];
+      };
+
+      var obliqueProduct = function obliqueProduct(v1, v2) {
+        return v1[0] * v2[1] - v2[0] * v1[1];
+      };
+
+      var ans = [];
+
+      for (var i = 0; i < barrier.coordinates.length - 1; i++) {
+        var tmp = check([barrier.coordinates[i], barrier.coordinates[i + 1]], segment);
+
+        if (tmp) {
+          ans.push(tmp);
+        }
+      }
+
+      if (ans.length % 2) {
+        return ans[0];
+      } else {
+        return false;
+      }
+
+      function check(a, b) {
+        var one = false;
+        var two = false;
+        var segment = getVector(b[0], b[1]);
+        var vec1 = getVector(b[0], a[0]);
+        var vec2 = getVector(b[0], a[1]);
+        var fst = obliqueProduct(segment, vec1);
+        var sec = obliqueProduct(segment, vec2);
+
+        if (fst * sec < 0) {
+          one = true;
+        }
+
+        segment = getVector(a[0], a[1]);
+        vec1 = getVector(a[0], b[0]);
+        vec2 = getVector(a[0], b[1]);
+        fst = obliqueProduct(segment, vec1);
+        sec = obliqueProduct(segment, vec2);
+
+        if (fst * sec < 0) {
+          two = true;
+        }
+
+        if (one && two) {
+          if (sec < 0) {
+            return barrier.left;
+          } else {
+            return barrier.left;
+          }
+        }
+
+        return false;
+      }
     }
 
     function bezier(geometry) {

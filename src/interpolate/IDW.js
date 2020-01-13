@@ -3,9 +3,10 @@ import { distance } from '../common/distance';
 
 function IDW(points, cellSize, options = {}) {
 
-    const { bbox, units, exponent } = optionsParser(options, points);
+    const { bbox, units, exponent, barriers } = optionsParser(options, points);
 
     const { latSize, longSize, degreeLatCellSize, degreeLongCellSize } = cellSizes(bbox, cellSize, units[0]);
+
 
     let grid;
     if (units[1] === 'degrees') {
@@ -24,20 +25,55 @@ function IDW(points, cellSize, options = {}) {
             Math.abs(bbox[0] - point[1]) / degreeLongCellSize,
             point[2]
         ]);
+
         const Grid = [];
-        for (let i = 0; i < latSize; i++) {
-            Grid[i] = [];
-            for (let j = 0; j < longSize; j++) {
-                const cellCenter = [i + 0.5, j + 0.5];
-                let top = 0, bot = 0;
-                _points.forEach(point => {
-                    const d = ((cellCenter[0] - point[0]) ** 2 + (cellCenter[1] - point[1]) ** 2) ** 2;
-                    top += point[2] / d ** (1 / exponent);
-                    bot += 1 / d ** (1 / exponent);
-                })
-                Grid[i][j] = top / bot;
+        if (barriers) {
+            barriers.forEach(barrier => {
+                for (let i = 0; i < barrier.coordinates.length; i++) {
+                    const tmp = Math.abs(bbox[1] - barrier.coordinates[i][1]) / degreeLatCellSize;
+                    barrier.coordinates[i][1] = Math.abs(bbox[0] - barrier.coordinates[i][0]) / degreeLongCellSize;
+                    barrier.coordinates[i][0] = tmp;
+                }
+            })
+
+
+            for (let i = 0; i < latSize; i++) {
+                Grid[i] = [];
+                for (let j = 0; j < longSize; j++) {
+                    const cellCenter = [i + 0.5, j + 0.5];
+                    let top = 0, bot = 0;
+                    _points.forEach(point => {
+
+                        let weight = 0;
+                        barriers.forEach(barrier => {
+                            const tmpW = intersection(barrier, [point, cellCenter]);
+                            if (tmpW) {
+                                weight += tmpW;
+                            }
+                        })
+                        const d = ((cellCenter[0] - point[0]) ** 2 + (cellCenter[1] - point[1]) ** 2) ** 2;
+                        top += point[2] / d ** (exponent + weight);
+                        bot += 1 / d ** (exponent + weight);
+                    })
+                    Grid[i][j] = top / bot;
+                }
+            }
+        } else {
+            for (let i = 0; i < latSize; i++) {
+                Grid[i] = [];
+                for (let j = 0; j < longSize; j++) {
+                    const cellCenter = [i + 0.5, j + 0.5];
+                    let top = 0, bot = 0;
+                    _points.forEach(point => {
+                        const d = ((cellCenter[0] - point[0]) ** 2 + (cellCenter[1] - point[1]) ** 2) ** 2;
+                        top += point[2] / d ** exponent;
+                        bot += 1 / d ** exponent;
+                    })
+                    Grid[i][j] = top / bot;
+                }
             }
         }
+
         return Grid;
     }
 
@@ -67,7 +103,7 @@ function IDW(points, cellSize, options = {}) {
 
 
 function optionsParser(options, points) {
-    let { bbox, units, exponent } = options
+    let { bbox, units, exponent, barriers } = options
 
 
     switch (typeof (bbox)) {
@@ -126,7 +162,17 @@ function optionsParser(options, points) {
         throw new Error('Неккоректное значение exponent')
     }
 
-    return { bbox, units, exponent }
+    if (barriers) {
+        barriers = barriers.features.map(barrier => {
+            return {
+                coordinates: barrier.geometry.coordinates,
+                left: barrier.properties.left,
+                right: barrier.properties.right,
+            }
+        })
+    }
+
+    return { bbox, units, exponent, barriers }
 }
 
 function bboxCalculator(percents, points) {
@@ -157,5 +203,61 @@ function bboxCalculator(percents, points) {
     return [swLong, swLat, neLong, neLat]
 }
 
+function intersection(barrier, segment) {
+    const getVector = (p1, p2) => [p2[0] - p1[0], p2[1] - p1[1]];
+    const obliqueProduct = (v1, v2) => v1[0] * v2[1] - v2[0] * v1[1];
+
+    const ans = [];
+    for (let i = 0; i < barrier.coordinates.length - 1; i++) {
+        const tmp = check([barrier.coordinates[i], barrier.coordinates[i + 1]], segment);
+        if (tmp) {
+            ans.push(tmp)
+        }
+    }
+
+    if (ans.length % 2) {
+        return ans[0];
+    } else {
+        return false;
+    }
+
+    function check(a, b) {
+        let one = false;
+        let two = false;
+
+        let segment = getVector(b[0], b[1]);
+        let vec1 = getVector(b[0], a[0]);
+        let vec2 = getVector(b[0], a[1]);
+
+        let fst = obliqueProduct(segment, vec1)
+        let sec = obliqueProduct(segment, vec2)
+
+        if (fst * sec < 0) {
+            one = true
+        }
+
+        segment = getVector(a[0], a[1]);
+        vec1 = getVector(a[0], b[0]);
+        vec2 = getVector(a[0], b[1]);
+
+        fst = obliqueProduct(segment, vec1)
+        sec = obliqueProduct(segment, vec2)
+
+
+        if (fst * sec < 0) {
+            two = true
+        }
+
+        if (one && two) {
+            if (sec < 0) {
+                return barrier.left;
+            } else {
+                return barrier.left;
+            }
+        }
+
+        return false
+    }
+}
 
 export { IDW }
