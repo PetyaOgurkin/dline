@@ -83,7 +83,7 @@ function drawIsobands(Grid, Step, DeltaLat, DeltaLong, Grid_Min_Lat, Grid_Min_Lo
         })
     }
 
-    return { GeoJson, chache };
+    return GeoJson;
 }
 
 export { drawIsobands }

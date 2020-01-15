@@ -54,7 +54,7 @@ const points = {
     "features": pointsFeatures
 }
 
-const gridSize = 200;
+const gridSize = 1000;
 
 
 function drawTurf() {
@@ -145,7 +145,7 @@ function drawDlineBands() {
     })
 
     console.time('IDW')
-    const IDW = dline.IDW(dots, gridSize, { bbox: [100, 100], exponent: 2, units: ['meters', 'degrees'], barriers: bar });
+    const IDW = dline.IDW(dots, gridSize, { bbox: [100, 100], exponent: 2, units: ['meters', 'degrees']/* , barriers: bar */ });
     console.timeEnd('IDW')
 
 
@@ -169,7 +169,9 @@ function drawDlineBands() {
     const bands = dline.DrawIsobandsWithCustomGrid(IDW.grid, step, IDW.degreeLatCellSize, IDW.degreeLongCellSize, IDW.bbox[1], IDW.bbox[0], 11, 0)
     console.timeEnd('isobandsDline')
 
-    // console.log(bands);
+    pgrid.features.forEach(feature => {
+        L.geoJSON(feature, { type: "band" }).bindPopup(feature.properties.value.toString()).addTo(map);
+    });
 
     const colors = {
         "less than 1": "#530FAD",
@@ -186,7 +188,7 @@ function drawDlineBands() {
     };
 
 
-    bands.GeoJson.features.forEach(feature => {
+    bands.features.forEach(feature => {
         L.geoJSON(feature, { color: colors[feature.properties.value], weight: 0, fillOpacity: 0.7, type: "band" }).bindPopup(feature.properties.value.toString()).addTo(map);
     });
 }

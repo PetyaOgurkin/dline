@@ -918,7 +918,6 @@
           maxlatbb = -Infinity;
       var minlongbb = Infinity,
           maxlongbb = -Infinity;
-      var chache = [];
 
       for (var _i = 0; _i < Bands.length; _i++) {
         newBands.push([]);
@@ -955,10 +954,7 @@
         });
       }
 
-      return {
-        GeoJson: GeoJson,
-        chache: chache
-      };
+      return GeoJson;
     }
 
     function DrawIsobandsWithExtrs(Dots, Step, Detalization, bbox) {
