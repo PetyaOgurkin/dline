@@ -2,6 +2,9 @@
 
 function getIsolines(RawIsolines) {
 
+    // console.log(deepCopy(RawIsolines));
+    
+
     const TempIsolines = [];
     let End_Isoline = true;
     while (RawIsolines.length > 0) {
@@ -45,3 +48,15 @@ function getIsolines(RawIsolines) {
 }
 
 export { getIsolines }
+
+function deepCopy(arr) {
+    const newArr = []
+    for (let i = 0; i < arr.length; i++) {
+        if (arr[i] instanceof Array) {
+            newArr.push(deepCopy(arr[i]));
+        } else {
+            newArr.push(arr[i])
+        }
+    }
+    return newArr
+}

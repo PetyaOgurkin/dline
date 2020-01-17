@@ -66,8 +66,8 @@ function drawTurf() {
 
     // console.log(grid);
 
-
-    const breaks = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+    const breaks = [0, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 340, 360, 380, 400, 450, 500, 1000];
+    // const breaks = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 
     console.time('isobandturf')
     const lines = turf.isobands(pgrid, breaks, { zProperty: 'value' });
@@ -76,19 +76,40 @@ function drawTurf() {
     // console.log(lines);
 
 
+
     const colorsTurf = {
-        "0-1": "#530FAD",
-        "1-2": "#1B1BB3",
-        "2-3": "#0B61A4",
-        "3-4": "#00AF64",
-        "4-5": "#67E300",
-        "5-6": "#CCF600",
-        "6-7": "#FFE800",
-        "7-8": "#FFBF00",
-        "8-9": "#FF9200",
-        "9-10": "#FF4900",
-        "10-11": "#FF0000",
+        "0-140": "#1240AB",
+        "140-160": "#0B61A4",
+        "160-180": "#009999",
+        "180-200": "#00AE68",
+        "200-220": "#00CC00",
+        "220-240": "#5DE100",
+        "240-260": "#9BED00",
+        "260-280": "#CCF600",
+        "280-300": "#FFFF00",
+        "300-320": "#FFE800",
+        "320-340": "#FFD300",
+        "340-360": "#FFBF00",
+        "360-380": "#FFAA00",
+        "380-400": "#FF9200",
+        "400-450": "#FF7100",
+        "450-500": "#FF4900",
+        "500-1000": "#FF0000",
     };
+    /* 
+        const colorsTurf = {
+            "0-1": "#530FAD",
+            "1-2": "#1B1BB3",
+            "2-3": "#0B61A4",
+            "3-4": "#00AF64",
+            "4-5": "#67E300",
+            "5-6": "#CCF600",
+            "6-7": "#FFE800",
+            "7-8": "#FFBF00",
+            "8-9": "#FF9200",
+            "9-10": "#FF4900",
+            "10-11": "#FF0000",
+        }; */
 
     map.eachLayer(layer => {
         if (layer.options.type === "band") {
@@ -96,7 +117,7 @@ function drawTurf() {
         }
     })
     lines.features.forEach(feature => {
-        L.geoJSON(feature, { color: colorsTurf[feature.properties.value], weight: 0, fillOpacity: .6, type: "band" }).bindPopup(feature.properties.value.toString()).addTo(map);
+        L.geoJSON(feature, { color: colorsTurf[feature.properties.value], weight: 0, fillOpacity: .7, type: "band" }).bindPopup(feature.properties.value.toString()).addTo(map);
     });
 
 }
@@ -116,14 +137,23 @@ function drawDline() {
 
 
     console.time('IDW')
-    const IDW = dline.IDW(dots, gridSize, { bbox: [100, 100], exponent: 2, units: ['meters', 'degrees'] });
+    // const IDW = dline.IDW(dots, gridSize, { bbox: [100, 100], exponent: 2, units: ['meters', 'degrees'] });
     console.timeEnd('IDW')
 
     console.time('dline isolines')
-    const lin = dline.DrawIsolinesWitchCustomGrid(IDW.grid, step, IDW.degreeLatCellSize, IDW.degreeLongCellSize, IDW.bbox[1], IDW.bbox[0], 11, 0)
+    // const lin = dline.DrawIsolinesWitchCustomGrid(IDW.grid, step, IDW.degreeLatCellSize, IDW.degreeLongCellSize, IDW.bbox[1], IDW.bbox[0], 11, 0)
     console.timeEnd('dline isolines')
 
-    lin.features.forEach(feature => {
+    const st = {
+        "type": "CustomValues",
+        "values": [500, 450, 400, 380, 360, 340, 320, 300, 280, 260, 240, 220, 200, 180, 160, 140]
+    }
+    const delta = 0.00083333333333333;
+    const minLat = 60 - (4920 * delta);
+    const minLong = 90 + (3240 * delta);
+    const Isolines = dline.DrawIsolinesWitchCustomGrid(Grid, st, delta, delta, minLat, minLong);
+
+    Isolines.features.forEach(feature => {
         L.geoJSON(feature, { type: "band" }).bindPopup(feature.properties.value.toString()).addTo(map);
     });
 
@@ -145,35 +175,94 @@ function drawDlineBands() {
     })
 
     console.time('IDW')
-    const IDW = dline.IDW(dots, gridSize, { bbox: [100, 100], exponent: 2, units: ['meters', 'degrees']/* , barriers: bar */ });
+    // const IDW = dline.IDW(dots, gridSize, { bbox: [100, 100], exponent: 2, units: ['meters', 'degrees']/* , barriers: bar */ });
     console.timeEnd('IDW')
 
 
+    /*   pgrid.features = [];
+      for (let i = 0; i < IDW.grid.length; i++) {
+          for (let j = 0; j < IDW.grid[i].length; j++) {
+              if (IDW.grid[i][j]) {
+                  pgrid.features.push({
+                      "type": "Feature",
+                      "properties": { "value": IDW.grid[i][j] },
+                      "geometry": {
+                          "type": "Point",
+                          "coordinates": [j * IDW.degreeLongCellSize + IDW.bbox[0], i * IDW.degreeLatCellSize + IDW.bbox[1]]
+                      }
+                  })
+              }
+          }
+      } */
+
+
+    const st = {
+        "type": "CustomValues",
+        "values": [500, 450, 400, 380, 360, 340, 320, 300, 280, 260, 240, 220, 200, 180, 160, 140]
+    }
+    const delta = 0.00083333333333333;
+    const minLat = 60 - (4920 * delta);
+    const minLong = 90 + (3240 * delta);
+    console.time('isobandsDline')
+    const bands = dline.DrawIsobandsWithCustomGrid(Grid, st, delta, delta, minLat, minLong);
+    console.timeEnd('isobandsDline')
+    // console.log(bands);
+
+
     pgrid.features = [];
-    for (let i = 0; i < IDW.grid.length; i++) {
-        for (let j = 0; j < IDW.grid[i].length; j++) {
-            if (IDW.grid[i][j]) {
+    for (let i = 0; i < Grid.length; i++) {
+        for (let j = 0; j < Grid[i].length; j++) {
+            if (Grid[i][j]) {
                 pgrid.features.push({
                     "type": "Feature",
-                    "properties": { "value": IDW.grid[i][j] },
+                    "properties": { "value": Grid[i][j] },
                     "geometry": {
                         "type": "Point",
-                        "coordinates": [j * IDW.degreeLongCellSize + IDW.bbox[0], i * IDW.degreeLatCellSize + IDW.bbox[1]]
+                        "coordinates": [j * delta + minLong, i * delta + minLat]
                     }
                 })
             }
         }
     }
 
-    console.time('isobandsDline')
-    const bands = dline.DrawIsobandsWithCustomGrid(IDW.grid, step, IDW.degreeLatCellSize, IDW.degreeLongCellSize, IDW.bbox[1], IDW.bbox[0], 11, 0)
-    console.timeEnd('isobandsDline')
+    // console.log(pgrid);
 
-    pgrid.features.forEach(feature => {
-        L.geoJSON(feature, { type: "band" }).bindPopup(feature.properties.value.toString()).addTo(map);
-    });
+
+    /* console.time('isobandsDline')
+    const bands = dline.DrawIsobandsWithCustomGrid(IDW.grid, step, IDW.degreeLatCellSize, IDW.degreeLongCellSize, IDW.bbox[1], IDW.bbox[0], 11, 0)
+    console.timeEnd('isobandsDline') */
+
+    /*  pgrid.features.forEach((feature, index) => {
+         if ((index > 100490 + 480 * 11 && index < 100510 + 480 * 11) ||
+             (index > 100490 + 480 * 12 && index < 100510 + 480 * 12) ||
+             (index > 100490 + 480 * 13 && index < 100510 + 480 * 13) ||
+             (index > 100490 + 480 * 14 && index < 100510 + 480 * 14)) {
+             L.geoJSON(feature, { type: "band" }).bindPopup(feature.properties.value.toString() + '-' + index.toString()).addTo(map);
+         }
+ 
+     }); */
 
     const colors = {
+        "less than 140": "#1240AB",
+        "160": "#0B61A4",
+        "180": "#009999",
+        "200": "#00AE68",
+        "220": "#00CC00",
+        "240": "#5DE100",
+        "260": "#9BED00",
+        "280": "#CCF600",
+        "300": "#FFFF00",
+        "320": "#FFE800",
+        "340": "#FFD300",
+        "360": "#FFBF00",
+        "380": "#FFAA00",
+        "400": "#FF9200",
+        "450": "#FF7100",
+        "500": "#FF4900",
+        "more than 500": "#FF0000",
+    };
+
+    /* const colors = {
         "less than 1": "#530FAD",
         "2": "#1B1BB3",
         "3": "#0B61A4",
@@ -185,8 +274,9 @@ function drawDlineBands() {
         "9": "#FF9200",
         "10": "#FF4900",
         "more than 10": "#FF0000",
-    };
+    }; */
 
+    // L.geoJSON(bands.features[1], { /* color: colors[bands.features[0].properties.value], weight: 0, fillOpacity: 0.7,  */type: "band" }).bindPopup(bands.features[1].properties.value.toString()).addTo(map);
 
     bands.features.forEach(feature => {
         L.geoJSON(feature, { color: colors[feature.properties.value], weight: 0, fillOpacity: 0.7, type: "band" }).bindPopup(feature.properties.value.toString()).addTo(map);

@@ -1,6 +1,6 @@
 export default function computeIsobands(grid, low, up) {
 
-    const interpolate = (p1, p2, c) => p1 > c ? (c - p2) / (p1 - p2) : (c - p1) / (p2 - p1);
+    const interpolate = (p1, p2, c) => p1 > c ? ((c + 0.0001) - p2) / (p1 - p2) : ((c + 0.0001) - p1) / (p2 - p1);
 
     /* values of vertexes */
     const A = (x, y) => grid[x + 1][y];
@@ -15,7 +15,7 @@ export default function computeIsobands(grid, low, up) {
     const Q = (x, y, c, h) => [x + Math.abs(c - interpolate(D(x, y), A(x, y), h)), y];
 
     const getTernaryCode = (a, b, c, d) => {
-        const check = v => v < low ? '0' : (v >= low && v < up) ? '1' : '2';
+        const check = v => v <= low ? '0' : (v > low && v <= up) ? '1' : '2';
         return check(a) + check(b) + check(c) + check(d);
     }
 
@@ -61,7 +61,7 @@ export default function computeIsobands(grid, low, up) {
 
     function getCenterOfCell(x, y) {
         const O = ((A(x, y) + B(x, y) + C(x, y) + D(x, y)) / 4);
-        return O < low ? 0 : O >= low && O < up ? 1 : 2
+        return O <= low ? 0 : O > low && O <= up ? 1 : 2
     }
 
     function insideContouring(code, x, y) {

@@ -95,6 +95,7 @@
 
     /* из пар точек делает последовательность */
     function getIsolines(RawIsolines) {
+      // console.log(deepCopy(RawIsolines));
       var TempIsolines = [];
       var End_Isoline = true;
 
@@ -255,7 +256,7 @@
 
     function computeIsobands(grid, low, up) {
       var interpolate = function interpolate(p1, p2, c) {
-        return p1 > c ? (c - p2) / (p1 - p2) : (c - p1) / (p2 - p1);
+        return p1 > c ? (c + 0.0001 - p2) / (p1 - p2) : (c + 0.0001 - p1) / (p2 - p1);
       };
       /* values of vertexes */
 
@@ -296,7 +297,7 @@
 
       var getTernaryCode = function getTernaryCode(a, b, c, d) {
         var check = function check(v) {
-          return v < low ? '0' : v >= low && v < up ? '1' : '2';
+          return v <= low ? '0' : v > low && v <= up ? '1' : '2';
         };
 
         return check(a) + check(b) + check(c) + check(d);
@@ -353,7 +354,7 @@
 
       function getCenterOfCell(x, y) {
         var O = (A(x, y) + B(x, y) + C(x, y) + D(x, y)) / 4;
-        return O < low ? 0 : O >= low && O < up ? 1 : 2;
+        return O <= low ? 0 : O > low && O <= up ? 1 : 2;
       }
 
       function insideContouring(code, x, y) {
