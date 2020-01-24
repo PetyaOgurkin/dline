@@ -297,7 +297,7 @@
 
       var getTernaryCode = function getTernaryCode(a, b, c, d) {
         var check = function check(v) {
-          return v <= low ? '0' : v > low && v <= up ? '1' : '2';
+          return v <= low || Number.isNaN(v) ? '0' : v > low && v <= up ? '1' : '2';
         };
 
         return check(a) + check(b) + check(c) + check(d);
@@ -1400,7 +1400,7 @@
                     weight += tmpW;
                   }
                 });
-                var d = Math.pow(Math.pow(cellCenter[0] - point[0], 2) + Math.pow(cellCenter[1] - point[1], 2), 2);
+                var d = Math.pow(Math.pow(cellCenter[0] - point[0], 2) + Math.pow(cellCenter[1] - point[1], 2), 0.5);
                 top += point[2] / Math.pow(d, exponent + weight);
                 bot += 1 / Math.pow(d, exponent + weight);
               });
@@ -1641,6 +1641,266 @@
       }
     }
 
+    function IDW$1(points, cellSize) {
+      var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
+      var _optionsParser = optionsParser$1(options, points),
+          bbox = _optionsParser.bbox,
+          units = _optionsParser.units,
+          exponent = _optionsParser.exponent,
+          mask = _optionsParser.mask,
+          buf = _optionsParser.buf,
+          weightUp = _optionsParser.weightUp,
+          weightDown = _optionsParser.weightDown;
+
+      var _cellSizes = cellSizes(bbox, cellSize, units[0]),
+          latSize = _cellSizes.latSize,
+          longSize = _cellSizes.longSize,
+          degreeLatCellSize = _cellSizes.degreeLatCellSize,
+          degreeLongCellSize = _cellSizes.degreeLongCellSize;
+
+      var bufR = buf * Math.sqrt(2); // console.log(bufR);
+
+      var grid;
+
+      if (units[1] === 'degrees') {
+        grid = calcInDegrees();
+      } else if (units[1] === 'meters') {
+        grid = calcInMeters();
+      } else {
+        throw new Error('как такое вообще возможно?');
+      }
+
+      return {
+        grid: grid,
+        latSize: latSize,
+        longSize: longSize,
+        degreeLatCellSize: degreeLatCellSize,
+        degreeLongCellSize: degreeLongCellSize,
+        bbox: bbox
+      };
+
+      function calcInDegrees() {
+        var _points = points.map(function (point) {
+          return [Math.abs(bbox[1] - point[0]) / degreeLatCellSize, Math.abs(bbox[0] - point[1]) / degreeLongCellSize, point[2]];
+        });
+
+        var Grid = [];
+
+        var _loop = function _loop(i) {
+          Grid[i] = [];
+
+          var _loop2 = function _loop2(j) {
+            var cellCenter = [i + 0.5, j + 0.5];
+            var top = 0,
+                bot = 0;
+
+            _points.forEach(function (point, index) {
+              var d = Math.pow(Math.pow(cellCenter[0] - point[0], 2) + Math.pow(cellCenter[1] - point[1], 2), 0.5); // console.log(d, bufR);
+
+              if (d <= bufR) {
+                var p1Long = Math.floor(Math.abs(mask.minlong - points[index][1]) / mask.delta);
+                var p1Lat = Math.floor(Math.abs(mask.minlat - points[index][0]) / mask.delta);
+                var p2Long = Math.floor(Math.abs(mask.minlong - (j * degreeLongCellSize + bbox[0])) / mask.delta);
+                var p2Lat = Math.floor(Math.abs(mask.minlat - (i * degreeLatCellSize + bbox[1])) / mask.delta);
+                var route = way(p1Lat, p1Long, p2Lat, p2Long, mask.grid);
+                var weight = 0;
+                route.forEach(function (c) {
+                  if (route[0] + weightUp[0] <= c) {
+                    weight += weightUp[1];
+                  } else if (route[0] - weightDown[0] >= c) {
+                    weight += weightDown[1];
+                  }
+                });
+                top += point[2] / Math.pow(d, exponent + weight);
+                bot += 1 / Math.pow(d, exponent + weight);
+              }
+            });
+
+            Grid[i][j] = top / bot;
+          };
+
+          for (var j = 0; j < longSize; j++) {
+            _loop2(j);
+          }
+        };
+
+        for (var i = 0; i < latSize; i++) {
+          _loop(i);
+        }
+
+        return Grid;
+      }
+
+      function calcInMeters() {
+        var Grid = [];
+
+        for (var i = 0; i < latSize; i++) {
+          Grid[i] = [];
+
+          var _loop3 = function _loop3(j) {
+            var cellCenter = [bbox[1] + (i + 0.5) * degreeLatCellSize, bbox[0] + (j + 0.5) * degreeLongCellSize];
+            var top = 0,
+                bot = 0;
+            points.forEach(function (point) {
+              var d = distance(point, cellCenter);
+              top += point[2] / Math.pow(d, exponent);
+              bot += 1 / Math.pow(d, exponent);
+            });
+            Grid[i][j] = top / bot;
+          };
+
+          for (var j = 0; j < longSize; j++) {
+            _loop3(j);
+          }
+        }
+
+        return Grid;
+      }
+    }
+
+    function optionsParser$1(options, points) {
+      var bbox = options.bbox,
+          units = options.units,
+          exponent = options.exponent,
+          mask = options.mask,
+          buf = options.buf,
+          weightUp = options.weightUp,
+          weightDown = options.weightDown;
+
+      switch (_typeof(bbox)) {
+        case "undefined":
+          bbox = bboxCalculator$1([0, 0], points);
+          break;
+
+        case "object":
+          if (!Array.isArray(bbox)) throw new Error('bbox не является массивом');
+
+          if (bbox.length === 0) {
+            bbox = bboxCalculator$1([0, 0], points);
+          } else if (bbox.length === 2) {
+            bbox.forEach(function (e) {
+              if (typeof e !== "number" || e < 0) throw new Error('Неккоректные значения bbox');
+            });
+            bbox = bboxCalculator$1(bbox, points);
+          } else if (bbox.length === 4) {
+            bbox.forEach(function (e) {
+              if (typeof e !== "number") throw new Error('Неккоректные значения bbox');
+            });
+          } else throw new Error('Некорректное кол-во элементов массива bbox');
+
+          break;
+
+        default:
+          throw new Error('bbox не является массивом');
+      }
+
+      switch (_typeof(units)) {
+        case 'string':
+        case "undefined":
+          if (units === 'meters' || units === undefined) {
+            units = ['meters', 'meters'];
+          } else if (units === 'degrees') {
+            units = ['degrees', 'degrees'];
+          } else throw new Error('Некорректные значения units');
+
+          break;
+
+        case 'object':
+          if (!Array.isArray(units)) throw new Error('units не является массивом');
+
+          if (units.length === 2) {
+            units.forEach(function (e) {
+              if (e !== 'meters' && e !== 'degrees') throw new Error('Некорректные значения units');
+            });
+          } else throw new Error('Некорректное кол-во элементов массива units');
+
+          break;
+
+        default:
+          throw new Error('Некорректные значения units');
+      }
+
+      if (exponent === undefined) {
+        exponent = 2;
+      } else if (typeof exponent !== "number" || exponent <= 0) {
+        throw new Error('Неккоректное значение exponent');
+      }
+
+      if (!mask) {
+        throw new Error('err');
+      }
+
+      return {
+        bbox: bbox,
+        units: units,
+        exponent: exponent,
+        mask: mask,
+        buf: buf,
+        weightUp: weightUp,
+        weightDown: weightDown
+      };
+    }
+
+    function bboxCalculator$1(percents, points) {
+      if (!Array.isArray(percents)) {
+        throw new Error('percents не Массив');
+      }
+
+      var minLat = Math.min.apply(Math, _toConsumableArray(points.map(function (point) {
+        return point[0];
+      })));
+      var minLong = Math.min.apply(Math, _toConsumableArray(points.map(function (point) {
+        return point[1];
+      })));
+      var maxLat = Math.max.apply(Math, _toConsumableArray(points.map(function (point) {
+        return point[0];
+      })));
+      var maxLong = Math.max.apply(Math, _toConsumableArray(points.map(function (point) {
+        return point[1];
+      }))); // расстояние между крайними точками в координатах
+
+      var _long = maxLong - minLong;
+
+      var lat = maxLat - minLat; // расстояние между границами сетки в координатах
+
+      var newLong = _long * (100 + percents[0]) / 100;
+      var newLat = lat * (100 + percents[1]) / 100; // вершины сетки
+
+      var swLong = minLong - (newLong - _long) / 2;
+      var swLat = minLat - (newLat - lat) / 2;
+      var neLong = maxLong + (newLong - _long) / 2;
+      var neLat = maxLat + (newLat - lat) / 2;
+      return [swLong, swLat, neLong, neLat];
+    }
+
+    function way(x1, y1, x2, y2, grid) {
+      var line = [];
+      var deltaX = Math.abs(x2 - x1);
+      var deltaY = Math.abs(y2 - y1);
+      var signX = x1 < x2 ? 1 : -1;
+      var signY = y1 < y2 ? 1 : -1;
+      var error = deltaX - deltaY;
+
+      while (x1 != x2 || y1 != y2) {
+        line.push(grid[x1][y1]);
+        var error2 = error * 2;
+
+        if (error2 > -deltaY) {
+          error -= deltaY;
+          x1 += signX;
+        }
+
+        if (error2 < deltaX) {
+          error += deltaX;
+          y1 += signY;
+        }
+      }
+
+      line.push(grid[x2][y2]);
+      return line;
+    }
+
     function bezier(geometry) {
       var out = [];
       var newLine = [];
@@ -1706,6 +1966,7 @@
     exports.DrawIsolinesWithExtrs = DrawIsolinesWithExtrs;
     exports.DrawIsolinesWithoutExtrs = DrawIsolinesWithoutExtrs;
     exports.IDW = IDW;
+    exports.IDW2 = IDW$1;
     exports.bezier = bezier;
     exports.cellSizes = cellSizes;
 

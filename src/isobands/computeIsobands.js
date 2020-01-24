@@ -15,7 +15,7 @@ export default function computeIsobands(grid, low, up) {
     const Q = (x, y, c, h) => [x + Math.abs(c - interpolate(D(x, y), A(x, y), h)), y];
 
     const getTernaryCode = (a, b, c, d) => {
-        const check = v => v <= low ? '0' : (v > low && v <= up) ? '1' : '2';
+        const check = v => v <= low || Number.isNaN(v) ? '0' : (v > low && v <= up) ? '1' : '2';
         return check(a) + check(b) + check(c) + check(d);
     }
 

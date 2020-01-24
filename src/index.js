@@ -12,4 +12,6 @@ export { cellSizes } from './common/cellSizes';
 
 export { IDW } from './interpolate/IDW';
 
+export { IDW2 } from './interpolate/IDW_WithBarriers';
+
 export { bezier } from './common/bezierInterpolation';

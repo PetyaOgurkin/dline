@@ -12,7 +12,6 @@
     <script defer src="../node_modules/simplify-js/simplify.js"></script>
     <script defer src="https://cdn.rawgit.com/gokertanrisever/leaflet-ruler/master/src/leaflet-ruler.js"></script>
     <script defer src="../dist/dline.js"></script>
-    <script defer src="srtm_kras.js"></script>
     <script defer src="index.js"></script>
 
     <link rel="stylesheet" href="../node_modules/leaflet/dist/leaflet.css">
@@ -30,12 +29,13 @@
 <body>
 
     <div id="map" class="map"></div>
-    <button onclick="drawTurf()">turf</button>
-    <button onclick="drawDline()">dline</button>
-    <button onclick="drawDlineBands()">dlineBands</button>
+    <button onclick="bandsTurf()">bandsTurf</button>
+    <button onclick="bandsDline()">bandsDline</button>
 
-    <button id="prev">prev</button>
-    <button id="next">next</button>
+    <button onclick="srtmTurf()">srtmTurf</button>
+    <button onclick="srtmDline()">srtmDline</button>
+
+    <button onclick="generateGrid()">generateGrid</button>
 </body>
 
 </html>

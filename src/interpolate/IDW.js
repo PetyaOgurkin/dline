@@ -51,7 +51,7 @@ function IDW(points, cellSize, options = {}) {
                                 weight += tmpW;
                             }
                         })
-                        const d = ((cellCenter[0] - point[0]) ** 2 + (cellCenter[1] - point[1]) ** 2) ** 2;
+                        const d = ((cellCenter[0] - point[0]) ** 2 + (cellCenter[1] - point[1]) ** 2) ** 0.5;
                         top += point[2] / d ** (exponent + weight);
                         bot += 1 / d ** (exponent + weight);
                     })
