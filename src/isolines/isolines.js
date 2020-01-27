@@ -1,9 +1,7 @@
-import { getIsolines } from '../common/getIsolines';
-import { stepOption } from '../common/stepOption';
+import toLine from '../common/toLine';
 import computeIsolines from './computeIsolines';
 
-
-function drawIsolines(Grid, Step, DeltaLat, DeltaLong, Grid_Min_Lat, Grid_Min_Long, Dot_Max_Z, Dot_Min_Z) {
+function isolines(grid, intervals) {
     const Isolines = [];
     const IsolinesValue = [];
 
@@ -12,26 +10,19 @@ function drawIsolines(Grid, Step, DeltaLat, DeltaLong, Grid_Min_Lat, Grid_Min_Lo
         "features": []
     };
 
-
-    const Steps = stepOption(Step, Dot_Max_Z, Dot_Min_Z);
-    let h;
-
-
-    for (let i = 0; i < Steps.length; i++) {
-
-        h = Steps[i];
-        Isolines.push(getIsolines(computeIsolines(Grid, h)));
+    for (let i = 0; i < intervals.length; i++) {
+        const h = intervals[i];
+        Isolines.push(toLine(computeIsolines(grid.grid, h)));
         IsolinesValue.push(h);
     }
 
-    let thrid;
     for (let i = 0; i < Isolines.length; i++) {
         for (let j = 0; j < Isolines[i].length; j++) {
             for (let k = 0; k < Isolines[i][j].length; k++) {
                 // переводим координаты точек в градусы
-                thrid = Isolines[i][j][k][0] * DeltaLat + Grid_Min_Lat;
-                Isolines[i][j][k][0] = Isolines[i][j][k][1] * DeltaLong + Grid_Min_Long;
-                Isolines[i][j][k][1] = thrid;
+                const tmp = Isolines[i][j][k][0] * grid.degreeLatCellSize + grid.bbox[1];
+                Isolines[i][j][k][0] = Isolines[i][j][k][1] * grid.degreeLongCellSize + grid.bbox[0];
+                Isolines[i][j][k][1] = tmp;
             }
 
             GeoJson.features.push({
@@ -51,4 +42,4 @@ function drawIsolines(Grid, Step, DeltaLat, DeltaLong, Grid_Min_Lat, Grid_Min_Lo
 }
 
 
-export { drawIsolines }
+export { isolines }

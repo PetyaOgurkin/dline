@@ -1,6 +1,6 @@
-import { distance } from './distance';
+import distance from './distance';
 
-function cellSizes(bbox, cellSize, units) {
+export default function cellSizes(bbox, cellSize, units) {
 
     if (units === 'meters') {
         /* размер сетки по широте, размер ячейки по широте */
@@ -34,7 +34,6 @@ function cellSizes(bbox, cellSize, units) {
         } else _cellSize = [cellSize, cellSize]
 
 
-
         /* размер сетки по широте, размер ячейки по широте */
         const LatDistance = Math.abs(bbox[1] - bbox[3]);
         const latSize = odd(LatDistance / _cellSize[0]);
@@ -58,5 +57,3 @@ function cellSizes(bbox, cellSize, units) {
         return !(ceil % 2) ? Math.floor(value) : ceil;
     };
 }
-
-export { cellSizes }
