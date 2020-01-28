@@ -15,6 +15,12 @@ const rand = (min, max) => Math.random() * (max - min) + min;
 const gridSize = 500;
 
 async function bandsWithMask() {
+    map.eachLayer(layer => {
+        if (layer.options.type === "band") {
+            map.removeLayer(layer)
+        }
+    })
+
     const points = [
         [55.986571, 92.762222, 0.0747704775481111],
         [56.0293, 92.76537, 0.213907208633093],
@@ -33,7 +39,7 @@ async function bandsWithMask() {
         [56.02594, 92.79871, 0.215188414192614],
         [55.978387, 92.677273, 0.065931373937677]
     ];
-    points.forEach(p => L.marker([p[0], p[1]]).bindPopup(p[2].toString()).addTo(map))
+    // points.forEach(p => L.marker([p[0], p[1]]).bindPopup(p[2].toString()).addTo(map))
 
     const mask = dline.ascToArray(await fetch('./krs_cut.asc').then(res => res.text()));
 
