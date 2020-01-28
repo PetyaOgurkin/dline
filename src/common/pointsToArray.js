@@ -1,0 +1,1 @@
+export const pointsToArray = (geoJson, z = 'value') => geoJson.features.map(p => [...p.geometry.coordinates.reverse(), p.properties[[z]]]);

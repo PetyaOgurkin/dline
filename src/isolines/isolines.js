@@ -20,8 +20,8 @@ function isolines(grid, intervals) {
         for (let j = 0; j < Isolines[i].length; j++) {
             for (let k = 0; k < Isolines[i][j].length; k++) {
                 // переводим координаты точек в градусы
-                const tmp = Isolines[i][j][k][0] * grid.degreeLatCellSize + grid.bbox[1];
-                Isolines[i][j][k][0] = Isolines[i][j][k][1] * grid.degreeLongCellSize + grid.bbox[0];
+                const tmp = Isolines[i][j][k][0] * grid.latCellSize + grid.bbox[1];
+                Isolines[i][j][k][0] = Isolines[i][j][k][1] * grid.longCellSize + grid.bbox[0];
                 Isolines[i][j][k][1] = tmp;
             }
 

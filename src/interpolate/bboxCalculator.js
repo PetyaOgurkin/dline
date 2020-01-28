@@ -1,7 +1,7 @@
 export default function bboxCalculator(percents, points) {
 
     if (!Array.isArray(percents)) {
-        throw new Error('percents не Массив')
+        throw new Error('percents is not array')
     }
 
     const minLat = Math.min(...points.map(point => point[0]))

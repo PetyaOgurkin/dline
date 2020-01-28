@@ -1,5 +1,4 @@
-export default function compareBands(bnds) {
-    const bands = [...bnds]
+export default function compareBands(bands) {
 
     const accessoriesList = {};
 

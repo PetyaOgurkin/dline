@@ -24,7 +24,7 @@ function isobands(grid, intervals) {
 
     lower_h = -Infinity, upper_h = intervals[intervals.length - 1];
     Bands.push(toLine(computeIsobands(grid.grid, lower_h, upper_h)));
-    BandsValue.push(">" + intervals[intervals.length - 1]);
+    BandsValue.push("<" + intervals[intervals.length - 1]);
 
     const newBands = [];
 
@@ -33,7 +33,7 @@ function isobands(grid, intervals) {
         for (let j = 0; j < Bands[i].length; j++) {
             newBands[i].push([]);
             for (let k = 0; k < Bands[i][j].length; k++) {
-                newBands[i][j].push([Bands[i][j][k][1] * grid.degreeLongCellSize + grid.bbox[0], Bands[i][j][k][0] * grid.degreeLatCellSize + grid.bbox[1]])
+                newBands[i][j].push([Bands[i][j][k][1] * grid.longCellSize + grid.bbox[0], Bands[i][j][k][0] * grid.latCellSize + grid.bbox[1]])
             }
         }
     }

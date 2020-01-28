@@ -59,25 +59,25 @@
       var southPoint = [bbox[1], bbox[0]];
       var LatDistance = distance(southPoint, northPoint);
       var latSize = odd(LatDistance / cellSize);
-      var degreeLatCellSize = Math.abs(bbox[1] - bbox[3]) * cellSize / LatDistance;
+      var latCellSize = Math.abs(bbox[1] - bbox[3]) * cellSize / LatDistance;
       /* по долготе */
 
       var westPoint = [bbox[1], bbox[0]];
       var eastPoint = [bbox[1], bbox[2]];
       var LongDistance = distance(eastPoint, westPoint);
       var longSize = odd(LongDistance / cellSize);
-      var degreeLongCellSize = Math.abs(bbox[0] - bbox[2]) * cellSize / LongDistance;
+      var longCellSize = Math.abs(bbox[0] - bbox[2]) * cellSize / LongDistance;
       return {
         latSize: latSize,
         longSize: longSize,
-        degreeLatCellSize: degreeLatCellSize,
-        degreeLongCellSize: degreeLongCellSize
+        latCellSize: latCellSize,
+        longCellSize: longCellSize
       };
     } else if (units === 'degrees') {
       var _cellSize;
 
       if (Array.isArray(cellSize)) {
-        if (cellSize.length === 1) _cellSize = [cellSize[0], cellSize[0]];else if (cellSize.length === 2) _cellSize = _toConsumableArray(cellSize);else throw new Error('так не может быть');
+        if (cellSize.length === 1) _cellSize = [cellSize[0], cellSize[0]];else if (cellSize.length === 2) _cellSize = _toConsumableArray(cellSize);
       } else _cellSize = [cellSize, cellSize];
       /* размер сетки по широте, размер ячейки по широте */
 
@@ -95,8 +95,8 @@
       return {
         latSize: _latSize,
         longSize: _longSize,
-        degreeLatCellSize: _cellSize[0],
-        degreeLongCellSize: _cellSize[1]
+        latCellSize: _cellSize[0],
+        longCellSize: _cellSize[1]
       };
     } else {
       throw new Error('wtf');
@@ -110,7 +110,7 @@
 
   function bboxCalculator(percents, points) {
     if (!Array.isArray(percents)) {
-      throw new Error('percents не Массив');
+      throw new Error('percents is not array');
     }
 
     var minLat = Math.min.apply(Math, _toConsumableArray(points.map(function (point) {
@@ -154,25 +154,25 @@
         break;
 
       case "object":
-        if (!Array.isArray(bbox)) throw new Error('bbox не является массивом');
+        if (!Array.isArray(bbox)) throw new Error('bbox is not array');
 
         if (bbox.length === 0) {
           bbox = bboxCalculator([0, 0], points);
         } else if (bbox.length === 2) {
           bbox.forEach(function (e) {
-            if (typeof e !== "number" || e < 0) throw new Error('Неккоректные значения bbox');
+            if (typeof e !== "number" || e < 0) throw new Error('invalid bbox values');
           });
           bbox = bboxCalculator(bbox, points);
         } else if (bbox.length === 4) {
           bbox.forEach(function (e) {
-            if (typeof e !== "number") throw new Error('Неккоректные значения bbox');
+            if (typeof e !== "number") throw new Error('invalid bbox values');
           });
-        } else throw new Error('Некорректное кол-во элементов массива bbox');
+        } else throw new Error('invalid bbox length');
 
         break;
 
       default:
-        throw new Error('bbox не является массивом');
+        throw new Error('bbox is not array');
     }
 
     switch (_typeof(units)) {
@@ -182,29 +182,37 @@
           units = ['meters', 'meters'];
         } else if (units === 'degrees') {
           units = ['degrees', 'degrees'];
-        } else throw new Error('Некорректные значения units');
+        } else throw new Error('invalid units values');
 
         break;
 
       case 'object':
-        if (!Array.isArray(units)) throw new Error('units не является массивом');
+        if (!Array.isArray(units)) throw new Error('units is not array');
 
         if (units.length === 2) {
           units.forEach(function (e) {
-            if (e !== 'meters' && e !== 'degrees') throw new Error('Некорректные значения units');
+            if (e !== 'meters' && e !== 'degrees') throw new Error('invalid units values');
           });
-        } else throw new Error('Некорректное кол-во элементов массива units');
+        } else throw new Error('invalid units length');
 
         break;
 
       default:
-        throw new Error('Некорректные значения units');
+        throw new Error('invalid units values');
     }
 
-    if (exponent === undefined) {
+    if (!exponent) {
       exponent = 2;
-    } else if (typeof exponent !== "number" || exponent <= 0) {
-      throw new Error('Неккоректное значение exponent');
+    }
+
+    if (mask) {
+      if (!weightUp) {
+        weightUp = [0, 0];
+      }
+
+      if (!weightDown) {
+        weightDown = [0, 0];
+      }
     }
 
     return {
@@ -215,6 +223,42 @@
       weightUp: weightUp,
       weightDown: weightDown
     };
+  }
+
+  function toAsc() {
+    var out = "ncols         ".concat(((this.bbox[2] - this.bbox[0]) / this.longCellSize).toFixed(), "\nnrows         ").concat(((this.bbox[3] - this.bbox[1]) / this.latCellSize).toFixed(), "\nxllcorner     ").concat(this.bbox[0], "\nyllcorner     ").concat(this.bbox[1], "\ncellsize      ").concat(this.latCellSize, "\nNODATA_value  -9999\n");
+
+    for (var i = this.grid.length - 1; i >= 0; i--) {
+      out += ' ' + this.grid[i].join(' ') + '\n';
+    }
+
+    return out;
+  }
+
+  function toGeoJson() {
+    var pointGrid = {
+      "type": "FeatureCollection",
+      "features": []
+    };
+
+    for (var i = 0; i < this.grid.length; i++) {
+      for (var j = 0; j < this.grid[i].length; j++) {
+        if (this.grid[i][j]) {
+          pointGrid.features.push({
+            "type": "Feature",
+            "properties": {
+              "value": this.grid[i][j]
+            },
+            "geometry": {
+              "type": "Point",
+              "coordinates": [j * this.longCellSize + this.bbox[0], i * this.latCellSize + this.bbox[1]]
+            }
+          });
+        }
+      }
+    }
+
+    return pointGrid;
   }
 
   function IDW(points, cellSize) {
@@ -231,8 +275,8 @@
     var _cellSizes = cellSizes(bbox, cellSize, units[0]),
         latSize = _cellSizes.latSize,
         longSize = _cellSizes.longSize,
-        degreeLatCellSize = _cellSizes.degreeLatCellSize,
-        degreeLongCellSize = _cellSizes.degreeLongCellSize;
+        latCellSize = _cellSizes.latCellSize,
+        longCellSize = _cellSizes.longCellSize;
 
     var grid;
 
@@ -248,15 +292,15 @@
       } else {
         grid = calculate(caseWithoutMaskMeters, points);
       }
-    } else {
-      throw new Error('как такое вообще возможно?');
     }
 
     return {
       grid: grid,
-      degreeLatCellSize: degreeLatCellSize,
-      degreeLongCellSize: degreeLongCellSize,
-      bbox: bbox
+      latCellSize: latCellSize,
+      longCellSize: longCellSize,
+      bbox: bbox,
+      toAsc: toAsc,
+      toGeoJson: toGeoJson
     };
 
     function calculate(theCase, points) {
@@ -299,7 +343,7 @@
     }
 
     function caseWithMaskMeters(points, i, j) {
-      var cellCenter = [bbox[1] + (i + 0.5) * degreeLatCellSize, bbox[0] + (j + 0.5) * degreeLongCellSize];
+      var cellCenter = [bbox[1] + (i + 0.5) * latCellSize, bbox[0] + (j + 0.5) * longCellSize];
       var top = 0,
           bot = 0;
       points.forEach(function (point, index) {
@@ -312,7 +356,7 @@
     }
 
     function caseWithoutMaskMeters(points, i, j) {
-      var cellCenter = [bbox[1] + (i + 0.5) * degreeLatCellSize, bbox[0] + (j + 0.5) * degreeLongCellSize];
+      var cellCenter = [bbox[1] + (i + 0.5) * latCellSize, bbox[0] + (j + 0.5) * longCellSize];
       var top = 0,
           bot = 0;
       points.forEach(function (point) {
@@ -325,15 +369,15 @@
 
     function getPointsForDegreesGrid(points) {
       return points.map(function (point) {
-        return [Math.abs(bbox[1] - point[0]) / degreeLatCellSize, Math.abs(bbox[0] - point[1]) / degreeLongCellSize, point[2]];
+        return [Math.abs(bbox[1] - point[0]) / latCellSize, Math.abs(bbox[0] - point[1]) / longCellSize, point[2]];
       });
     }
 
     function getWeight(i, j, index) {
-      var p1Long = Math.floor(Math.abs(mask.minLong - points[index][1]) / mask.cellsize);
-      var p1Lat = Math.floor(Math.abs(mask.minLat - points[index][0]) / mask.cellsize);
-      var p2Long = Math.floor(Math.abs(mask.minLong - (j * degreeLongCellSize + bbox[0])) / mask.cellsize);
-      var p2Lat = Math.floor(Math.abs(mask.minLat - (i * degreeLatCellSize + bbox[1])) / mask.cellsize);
+      var p1Long = Math.floor(Math.abs(mask.bbox[0] - points[index][1]) / mask.longCellSize);
+      var p1Lat = Math.floor(Math.abs(mask.bbox[1] - points[index][0]) / mask.latCellSize);
+      var p2Long = Math.floor(Math.abs(mask.bbox[0] - (j * longCellSize + bbox[0])) / mask.longCellSize);
+      var p2Lat = Math.floor(Math.abs(mask.bbox[1] - (i * latCellSize + bbox[1])) / mask.latCellSize);
       var route = way(p1Lat, p1Long, p2Lat, p2Long);
       var weight = 0;
       route.forEach(function (c) {
@@ -424,15 +468,97 @@
     }
 
     return {
-      cols: cols,
-      rows: rows,
-      minLong: minLong,
-      minLat: minLat,
-      cellsize: cellsize,
+      grid: out.reverse(),
+      latCellSize: cellsize,
+      longCellSize: cellsize,
+      bbox: [minLong, minLat, minLong + cols * cellsize, minLat + rows * cellsize],
       noData: noData,
-      grid: out.reverse()
+      toGeoJson: toGeoJson
     };
   }
+
+  function pointGridToArray(geoJson) {
+    var z = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'value';
+    var bbox = [geoJson.features[0].geometry.coordinates[0], geoJson.features[0].geometry.coordinates[1]];
+
+    if (geoJson.features[1].geometry.coordinates[0] === bbox[0]) {
+      var latCellSize = geoJson.features[1].geometry.coordinates[1] - bbox[1];
+      var longCellSize;
+      var rows;
+
+      for (var i = 1; i < geoJson.features.length; i++) {
+        if (geoJson.features[i].geometry.coordinates[1] === bbox[1]) {
+          longCellSize = geoJson.features[i].geometry.coordinates[0] - bbox[0];
+          rows = i;
+          break;
+        }
+      }
+
+      var cols = geoJson.features.length / rows;
+      bbox.push(bbox[0] + cols * longCellSize, bbox[1] + rows * latCellSize);
+      var grid = [];
+      geoJson.features.forEach(function (p, idx) {
+        var i = Math.floor(idx / rows);
+        var j = idx - i * rows;
+
+        if (!grid[j]) {
+          grid[j] = [];
+        }
+
+        grid[j][i] = p.properties[[z]];
+      });
+      return {
+        grid: grid,
+        latCellSize: latCellSize,
+        longCellSize: longCellSize,
+        bbox: bbox,
+        toAsc: toAsc
+      };
+    } else {
+      var _longCellSize = geoJson.features[1].geometry.coordinates[0] - bbox[0];
+
+      var _latCellSize;
+
+      var _cols;
+
+      for (var _i = 1; _i < geoJson.features.length; _i++) {
+        if (geoJson.features[_i].geometry.coordinates[0] === bbox[0]) {
+          _latCellSize = geoJson.features[_i].geometry.coordinates[1] - bbox[1];
+          _cols = _i;
+          break;
+        }
+      }
+
+      var _rows = geoJson.features.length / _cols;
+
+      bbox.push(bbox[0] + _cols * _longCellSize, bbox[1] + _rows * _latCellSize);
+      var _grid = [];
+      geoJson.features.forEach(function (p, idx) {
+        var i = Math.floor(idx / _cols);
+        var j = idx - i * _cols;
+
+        if (!_grid[i]) {
+          _grid[i] = [];
+        }
+
+        _grid[i][j] = p.properties[[z]];
+      });
+      return {
+        grid: _grid,
+        latCellSize: _latCellSize,
+        longCellSize: _longCellSize,
+        bbox: bbox,
+        toAsc: toAsc
+      };
+    }
+  }
+
+  var pointsToArray = function pointsToArray(geoJson) {
+    var z = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'value';
+    return geoJson.features.map(function (p) {
+      return [].concat(_toConsumableArray(p.geometry.coordinates.reverse()), [p.properties[[z]]]);
+    });
+  };
 
   /* из пар точек делает последовательность */
   function toLine(couples) {
@@ -478,9 +604,7 @@
     return tmp;
   }
 
-  function compareBands(bnds) {
-    var bands = _toConsumableArray(bnds);
-
+  function compareBands(bands) {
     var accessoriesList = {};
 
     for (var i = 0; i < bands.length; i++) {
@@ -1189,7 +1313,7 @@
 
     lower_h = -Infinity, upper_h = intervals[intervals.length - 1];
     Bands.push(toLine(computeIsobands(grid.grid, lower_h, upper_h)));
-    BandsValue.push(">" + intervals[intervals.length - 1]);
+    BandsValue.push("<" + intervals[intervals.length - 1]);
     var newBands = [];
 
     for (var _i = 0; _i < Bands.length; _i++) {
@@ -1199,7 +1323,7 @@
         newBands[_i].push([]);
 
         for (var k = 0; k < Bands[_i][j].length; k++) {
-          newBands[_i][j].push([Bands[_i][j][k][1] * grid.degreeLongCellSize + grid.bbox[0], Bands[_i][j][k][0] * grid.degreeLatCellSize + grid.bbox[1]]);
+          newBands[_i][j].push([Bands[_i][j][k][1] * grid.longCellSize + grid.bbox[0], Bands[_i][j][k][0] * grid.latCellSize + grid.bbox[1]]);
         }
       }
     }
@@ -1421,8 +1545,8 @@
       for (var j = 0; j < Isolines[_i].length; j++) {
         for (var k = 0; k < Isolines[_i][j].length; k++) {
           // переводим координаты точек в градусы
-          var tmp = Isolines[_i][j][k][0] * grid.degreeLatCellSize + grid.bbox[1];
-          Isolines[_i][j][k][0] = Isolines[_i][j][k][1] * grid.degreeLongCellSize + grid.bbox[0];
+          var tmp = Isolines[_i][j][k][0] * grid.latCellSize + grid.bbox[1];
+          Isolines[_i][j][k][0] = Isolines[_i][j][k][1] * grid.longCellSize + grid.bbox[0];
           Isolines[_i][j][k][1] = tmp;
         }
 
@@ -1446,6 +1570,8 @@
   exports.ascToArray = ascToArray;
   exports.isobands = isobands;
   exports.isolines = isolines;
+  exports.pointGridToArray = pointGridToArray;
+  exports.pointsToArray = pointsToArray;
 
   Object.defineProperty(exports, '__esModule', { value: true });
 

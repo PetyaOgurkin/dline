@@ -1,3 +1,5 @@
+import toGeoJson from './toGeoJson'
+
 function ascToArray(asc) {
     const out = [];
     const grid = asc.split('\n');
@@ -34,7 +36,19 @@ function ascToArray(asc) {
         })
     }
 
-    return { cols, rows, minLong, minLat, cellsize, noData, grid: out.reverse() }
+    return {
+        grid: out.reverse(),
+        latCellSize: cellsize,
+        longCellSize: cellsize,
+        bbox: [
+            minLong,
+            minLat,
+            minLong + cols * cellsize,
+            minLat + rows * cellsize
+        ],
+        noData,
+        toGeoJson
+    }
 }
 
 

@@ -8,20 +8,20 @@ export default function cellSizes(bbox, cellSize, units) {
         const southPoint = [bbox[1], bbox[0]];
         const LatDistance = distance(southPoint, northPoint);
         const latSize = odd(LatDistance / cellSize);
-        const degreeLatCellSize = Math.abs(bbox[1] - bbox[3]) * cellSize / LatDistance;
+        const latCellSize = Math.abs(bbox[1] - bbox[3]) * cellSize / LatDistance;
 
         /* по долготе */
         const westPoint = [bbox[1], bbox[0]];
         const eastPoint = [bbox[1], bbox[2]];
         const LongDistance = distance(eastPoint, westPoint);
         const longSize = odd(LongDistance / cellSize);
-        const degreeLongCellSize = Math.abs(bbox[0] - bbox[2]) * cellSize / LongDistance;
+        const longCellSize = Math.abs(bbox[0] - bbox[2]) * cellSize / LongDistance;
 
         return {
             latSize,
             longSize,
-            degreeLatCellSize,
-            degreeLongCellSize
+            latCellSize,
+            longCellSize
         }
 
     } else if (units === 'degrees') {
@@ -30,7 +30,6 @@ export default function cellSizes(bbox, cellSize, units) {
         if (Array.isArray(cellSize)) {
             if (cellSize.length === 1) _cellSize = [cellSize[0], cellSize[0]]
             else if (cellSize.length === 2) _cellSize = [...cellSize]
-            else throw new Error('так не может быть')
         } else _cellSize = [cellSize, cellSize]
 
 
@@ -45,8 +44,8 @@ export default function cellSizes(bbox, cellSize, units) {
         return {
             latSize,
             longSize,
-            degreeLatCellSize: _cellSize[0],
-            degreeLongCellSize: _cellSize[1]
+            latCellSize: _cellSize[0],
+            longCellSize: _cellSize[1]
         }
     } else {
         throw new Error('wtf')

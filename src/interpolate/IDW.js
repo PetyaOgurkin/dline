@@ -1,12 +1,14 @@
 import cellSizes from './cellSizes';
 import distance from './distance';
 import optionsParser from './optionsParser';
+import toAsc from '../common/toAsc';
+import toGeoJson from '../common/toGeoJson';
 
 function IDW(points, cellSize, options = {}) {
 
     const { bbox, units, exponent, mask, weightUp, weightDown } = optionsParser(options, points);
 
-    const { latSize, longSize, degreeLatCellSize, degreeLongCellSize } = cellSizes(bbox, cellSize, units[0]);
+    const { latSize, longSize, latCellSize, longCellSize } = cellSizes(bbox, cellSize, units[0]);
 
     let grid;
     if (units[1] === 'degrees') {
@@ -21,11 +23,9 @@ function IDW(points, cellSize, options = {}) {
         } else {
             grid = calculate(caseWithoutMaskMeters, points);
         }
-    } else {
-        throw new Error('как такое вообще возможно?')
     }
 
-    return { grid, degreeLatCellSize, degreeLongCellSize, bbox }
+    return { grid, latCellSize, longCellSize, bbox, toAsc, toGeoJson }
 
     function calculate(theCase, points) {
         const grid = [];
@@ -64,7 +64,7 @@ function IDW(points, cellSize, options = {}) {
     }
 
     function caseWithMaskMeters(points, i, j) {
-        const cellCenter = [bbox[1] + (i + 0.5) * degreeLatCellSize, bbox[0] + (j + 0.5) * degreeLongCellSize];
+        const cellCenter = [bbox[1] + (i + 0.5) * latCellSize, bbox[0] + (j + 0.5) * longCellSize];
         let top = 0, bot = 0;
 
         points.forEach((point, index) => {
@@ -77,7 +77,7 @@ function IDW(points, cellSize, options = {}) {
     }
 
     function caseWithoutMaskMeters(points, i, j) {
-        const cellCenter = [bbox[1] + (i + 0.5) * degreeLatCellSize, bbox[0] + (j + 0.5) * degreeLongCellSize];
+        const cellCenter = [bbox[1] + (i + 0.5) * latCellSize, bbox[0] + (j + 0.5) * longCellSize];
         let top = 0, bot = 0;
 
         points.forEach(point => {
@@ -90,18 +90,18 @@ function IDW(points, cellSize, options = {}) {
 
     function getPointsForDegreesGrid(points) {
         return points.map(point => [
-            Math.abs(bbox[1] - point[0]) / degreeLatCellSize,
-            Math.abs(bbox[0] - point[1]) / degreeLongCellSize,
+            Math.abs(bbox[1] - point[0]) / latCellSize,
+            Math.abs(bbox[0] - point[1]) / longCellSize,
             point[2]
         ]);
     }
 
     function getWeight(i, j, index) {
-        const p1Long = Math.floor(Math.abs(mask.minLong - points[index][1]) / mask.cellsize);
-        const p1Lat = Math.floor(Math.abs(mask.minLat - points[index][0]) / mask.cellsize);
+        const p1Long = Math.floor(Math.abs(mask.bbox[0] - points[index][1]) / mask.longCellSize);
+        const p1Lat = Math.floor(Math.abs(mask.bbox[1] - points[index][0]) / mask.latCellSize);
 
-        const p2Long = Math.floor(Math.abs(mask.minLong - (j * degreeLongCellSize + bbox[0])) / mask.cellsize);
-        const p2Lat = Math.floor(Math.abs(mask.minLat - (i * degreeLatCellSize + bbox[1])) / mask.cellsize);
+        const p2Long = Math.floor(Math.abs(mask.bbox[0] - (j * longCellSize + bbox[0])) / mask.longCellSize);
+        const p2Lat = Math.floor(Math.abs(mask.bbox[1] - (i * latCellSize + bbox[1])) / mask.latCellSize);
 
         const route = way(p1Lat, p1Long, p2Lat, p2Long);
 
