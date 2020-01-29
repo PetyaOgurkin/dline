@@ -145,8 +145,7 @@
         units = options.units,
         exponent = options.exponent,
         mask = options.mask,
-        weightUp = options.weightUp,
-        weightDown = options.weightDown;
+        boundaries = options.boundaries;
 
     switch (_typeof(bbox)) {
       case "undefined":
@@ -205,14 +204,32 @@
       exponent = 2;
     }
 
-    if (mask) {
-      if (!weightUp) {
-        weightUp = [0, 0];
-      }
+    var lowerIntervals, upperIntervals;
 
-      if (!weightDown) {
-        weightDown = [0, 0];
-      }
+    if (mask) {
+      if (boundaries) {
+        var getHigherIntervals = function getHigherIntervals(w) {
+          var tmp = w.filter(function (e) {
+            return e[0] > 0;
+          }).sort(function (a, b) {
+            return b[0] - a[0];
+          });
+          tmp.unshift([Infinity]);
+          return tmp.length ? tmp : false;
+        };
+
+        var getLowerIntervals = function getLowerIntervals(w) {
+          var tmp = w.filter(function (e) {
+            return e[0] < 0;
+          }).sort(function (a, b) {
+            return b[0] - a[0];
+          });
+          tmp.push([-Infinity]);
+          return tmp.length ? tmp : false;
+        };
+        lowerIntervals = getLowerIntervals(boundaries);
+        upperIntervals = getHigherIntervals(boundaries);
+      } else throw new Error('boundaries is undefined');
     }
 
     return {
@@ -220,8 +237,8 @@
       units: units,
       exponent: exponent,
       mask: mask,
-      weightUp: weightUp,
-      weightDown: weightDown
+      lowerIntervals: lowerIntervals,
+      upperIntervals: upperIntervals
     };
   }
 
@@ -269,8 +286,8 @@
         units = _optionsParser.units,
         exponent = _optionsParser.exponent,
         mask = _optionsParser.mask,
-        weightUp = _optionsParser.weightUp,
-        weightDown = _optionsParser.weightDown;
+        lowerIntervals = _optionsParser.lowerIntervals,
+        upperIntervals = _optionsParser.upperIntervals;
 
     var _cellSizes = cellSizes(bbox, cellSize, units[0]),
         latSize = _cellSizes.latSize,
@@ -282,13 +299,21 @@
 
     if (units[1] === 'degrees') {
       if (mask) {
-        grid = calculate(caseWithMaskDegrees, getPointsForDegreesGrid(points));
+        if (bbox[0] >= mask.bbox[0] && bbox[1] >= mask.bbox[1] && bbox[2] <= mask.bbox[2] && bbox[3] <= mask.bbox[3]) {
+          grid = calculate(caseWithMaskDegrees, getPointsForDegreesGrid(points));
+        } else {
+          throw new Error('mask shoud be bigger then bbox');
+        }
       } else {
         grid = calculate(caseWithoutMaskDegrees, getPointsForDegreesGrid(points));
       }
     } else if (units[1] === 'meters') {
       if (mask) {
-        grid = calculate(caseWithMaskMeters, points);
+        if (bbox[0] >= mask.bbox[0] && bbox[1] >= mask.bbox[1] && bbox[2] <= mask.bbox[2] && bbox[3] <= mask.bbox[3]) {
+          grid = calculate(caseWithMaskMeters, points);
+        } else {
+          throw new Error('mask shoud be bigger then bbox');
+        }
       } else {
         grid = calculate(caseWithoutMaskMeters, points);
       }
@@ -382,10 +407,26 @@
       var weight = 0;
       route.forEach(function (c) {
         if (c !== mask.noData && route[0] !== mask.noData) {
-          if (route[0] + weightUp[0] <= c) {
-            weight += weightUp[1];
-          } else if (route[0] - weightDown[0] >= c) {
-            weight += weightDown[1];
+          var d = c - route[0];
+
+          if (d > 0) {
+            if (upperIntervals) {
+              for (var _i = 1; _i < upperIntervals.length; _i++) {
+                if (d >= upperIntervals[_i][0] && d < upperIntervals[_i - 1][0]) {
+                  weight += upperIntervals[_i][1];
+                  break;
+                }
+              }
+            }
+          } else if (d < 0) {
+            if (lowerIntervals) {
+              for (var _i2 = 1; _i2 < lowerIntervals.length; _i2++) {
+                if (d > lowerIntervals[_i2][0] && d <= lowerIntervals[_i2 - 1][0]) {
+                  weight += lowerIntervals[_i2 - 1][1];
+                  break;
+                }
+              }
+            }
           }
         }
       });

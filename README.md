@@ -2,6 +2,8 @@
 
 ## Interpolation
 
+### Example
+
 ### Arguments
 - `points` - массив входных точек **[lat, long, z]**
 - `cellSize` - размер ячейки выходной сетки

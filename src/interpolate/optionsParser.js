@@ -1,7 +1,7 @@
 import bboxCalculator from './bboxCalculator';
 
 export default function optionsParser(options, points) {
-    let { bbox, units, exponent, mask, weightUp, weightDown } = options
+    let { bbox, units, exponent, mask, boundaries } = options
 
     switch (typeof (bbox)) {
         case "undefined":
@@ -55,17 +55,27 @@ export default function optionsParser(options, points) {
 
     if (!exponent) {
         exponent = 2;
-    } 
-
-    if (mask) {
-        if (!weightUp) {
-            weightUp = [0, 0]
-        }
-
-        if (!weightDown) {
-            weightDown = [0, 0]
-        }
     }
 
-    return { bbox, units, exponent, mask, weightUp, weightDown }
+    let lowerIntervals, upperIntervals;
+    if (mask) {
+        if (boundaries) {
+            function getHigherIntervals(w) {
+                const tmp = w.filter(e => e[0] > 0).sort((a, b) => b[0] - a[0]);
+                tmp.unshift([Infinity]);
+                return tmp.length ? tmp : false;
+            };
+
+            function getLowerIntervals(w) {
+                const tmp = w.filter(e => e[0] < 0).sort((a, b) => b[0] - a[0]);
+                tmp.push([-Infinity])
+                return tmp.length ? tmp : false;
+            };
+
+            lowerIntervals = getLowerIntervals(boundaries)
+            upperIntervals = getHigherIntervals(boundaries)
+        } else throw new Error('boundaries is undefined')
+    }
+
+    return { bbox, units, exponent, mask, lowerIntervals, upperIntervals }
 }

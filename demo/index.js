@@ -8,8 +8,6 @@ L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_toke
     id: 'mapbox/streets-v11'
 }).addTo(map);
 
-L.control.ruler().addTo(map);
-
 const rand = (min, max) => Math.random() * (max - min) + min;
 
 const gridSize = 500;
@@ -44,7 +42,7 @@ async function bandsWithMask() {
     const mask = dline.ascToArray(await fetch('./krs_cut.asc').then(res => res.text()));
 
     console.time('IDW with mask')
-    const grid = dline.IDW(points, gridSize, { bbox: [5, 5], exponent: 3, units: ['meters', 'degrees'], mask, weightUp: [20, 0.2], weightDown: [50, 0.1] });
+    const grid = dline.IDW(points, gridSize, { bbox: [10, 10], exponent: 3, units: ['meters', 'degrees'], mask, boundaries: [[20, 0.2], [-50, 0.1]] });
     console.timeEnd('IDW with mask')
 
     console.time('bands')

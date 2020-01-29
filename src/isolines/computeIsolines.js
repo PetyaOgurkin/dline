@@ -70,7 +70,6 @@ export default function computeIsolines(grid, h) {
 
         let o;
         switch (val) {
-
             case "1110": isolines.push(edges("d-", x, y, h)); break;
             case "0001": isolines.push(edges("d+", x, y, h)); break;
             case "1101": isolines.push(edges("c-", x, y, h)); break;

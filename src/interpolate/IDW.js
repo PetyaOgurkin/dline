@@ -6,20 +6,30 @@ import toGeoJson from '../common/toGeoJson';
 
 function IDW(points, cellSize, options = {}) {
 
-    const { bbox, units, exponent, mask, weightUp, weightDown } = optionsParser(options, points);
+    const { bbox, units, exponent, mask, lowerIntervals, upperIntervals } = optionsParser(options, points);
 
     const { latSize, longSize, latCellSize, longCellSize } = cellSizes(bbox, cellSize, units[0]);
 
     let grid;
     if (units[1] === 'degrees') {
         if (mask) {
-            grid = calculate(caseWithMaskDegrees, getPointsForDegreesGrid(points));
+            if (bbox[0] >= mask.bbox[0] && bbox[1] >= mask.bbox[1] && bbox[2] <= mask.bbox[2] && bbox[3] <= mask.bbox[3]) {
+                grid = calculate(caseWithMaskDegrees, getPointsForDegreesGrid(points));
+            } else {
+                throw new Error('mask shoud be bigger then bbox');
+            }
+
         } else {
             grid = calculate(caseWithoutMaskDegrees, getPointsForDegreesGrid(points));
         }
     } else if (units[1] === 'meters') {
         if (mask) {
-            grid = calculate(caseWithMaskMeters, points);
+            if (bbox[0] >= mask.bbox[0] && bbox[1] >= mask.bbox[1] && bbox[2] <= mask.bbox[2] && bbox[3] <= mask.bbox[3]) {
+                grid = calculate(caseWithMaskMeters, points);
+            } else {
+                throw new Error('mask shoud be bigger then bbox');
+            }
+
         } else {
             grid = calculate(caseWithoutMaskMeters, points);
         }
@@ -108,10 +118,25 @@ function IDW(points, cellSize, options = {}) {
         let weight = 0;
         route.forEach(c => {
             if (c !== mask.noData && route[0] !== mask.noData) {
-                if (route[0] + weightUp[0] <= c) {
-                    weight += weightUp[1];
-                } else if (route[0] - weightDown[0] >= c) {
-                    weight += weightDown[1];
+                const d = c - route[0];
+                if (d > 0) {
+                    if (upperIntervals) {
+                        for (let i = 1; i < upperIntervals.length; i++) {
+                            if (d >= upperIntervals[i][0] && d < upperIntervals[i - 1][0]) {
+                                weight += upperIntervals[i][1];
+                                break;
+                            }
+                        }
+                    }
+                } else if (d < 0) {
+                    if (lowerIntervals) {
+                        for (let i = 1; i < lowerIntervals.length; i++) {
+                            if (d > lowerIntervals[i][0] && d <= lowerIntervals[i - 1][0]) {
+                                weight += lowerIntervals[i - 1][1];
+                                break;
+                            }
+                        }
+                    }
                 }
             }
         })
