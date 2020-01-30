@@ -46,9 +46,8 @@ async function bandsWithMask() {
     console.timeEnd('IDW with mask')
 
     console.time('bands')
-    const bands = dline.isobands(grid, [0.6, 0.3, 0.2, 0.15, 0.1, 0.05])
+    const bands = dline.isobands(grid, [0.05, 0.1, 0.15, 0.2, 0.3, 0.6])
     console.timeEnd('bands')
-
 
     const colors = {
         "<0.05": "#34D800",
@@ -77,7 +76,7 @@ async function srtm() {
     console.timeEnd('convert')
 
     console.time('srtm')
-    const bands = dline.isobands(grid, [500, 450, 400, 380, 360, 340, 320, 300, 280, 260, 240, 220, 200, 180, 160, 140]);
+    const bands = dline.isobands(grid, [140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 340, 360, 380, 400, 450, 500]);
     console.timeEnd('srtm')
 
     const colors = {
@@ -114,12 +113,14 @@ function bands() {
     })
 
     const points = [];
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < 60; i++) {
         points.push([rand(55.9, 56.1), rand(92.6, 93.1), rand(0, 0.7)])
     }
 
+    const breaks = [0.05, 0.1, 0.15, 0.2, 0.3, 0.6];
+
     console.time('bands')
-    const bands = dline.isobands(dline.IDW(points, gridSize), [0.6, 0.3, 0.2, 0.15, 0.1, 0.05])
+    const bands = dline.isobands(dline.IDW(points, gridSize, { exponent: 10 }), breaks)
     console.timeEnd('bands')
 
     const colors = {

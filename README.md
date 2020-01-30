@@ -1,33 +1,53 @@
 # dline
+saasdasdads
+## Istallation
+  use npm to install **dline** in node.js 
+```
+ npm i dline
+```
+ or CDN to include **dline** in browser
+```
+ <script src="#"></script>
+```
+## Documentation
 
-## Interpolation
+### Interpolation
 
-### Example
+  **dline** uses the IDW method as interpolation. There is also an experimental function of using a mask to calculate a unique weight in each cell of the output grid.
 
-### Arguments
-- `points` - массив входных точек **[lat, long, z]**
-- `cellSize` - размер ячейки выходной сетки
-    - **[lat, long]** работает только если размер ячейки задан в градусах
-    - **value** одинаковые размеры по lat и по long
-- `options` - дополнительные опции
+```
+ dline.IDW(points, cellSize, options);
+```
+#### Arguments
+ - `points` - reference point array `[[lat1,long1,z1],[lat2,long2,z2]...]`
+ - `cellSize` - `[latCellSize,longCellSize]` only for degrees or `value` for degrees or meters units
+ - `options` - additional optional settings
 
-### Options
-- `bbox` - по умолчанию **[]**, в таком случае крайние точки будут высчитаны из `points`. 
-    - **[minLong, minLat, maxLong, maxLat]**, фиксированные размеры выходной сетки
-    - **[longPercent, latPercent]**, увеличивает размеры сетки на **longPercent** / **latPercent** от станадртных
-- `units` - по умолчанию **'meters'**
-    - **'value'**, может быть **'meters'** или **'degrees'**
-    - **['cellSizeUnits', 'distanceUnits']**, задается в случае если считать расстояния в ОВР нужно в других еденицах измерения
-- `exponent` - по умолчанию **2**, степень, в которую возводится расстояние в ОВР
+#### Options
+ - `bbox` - default `[0,0]`, can be an ordinary bbox like `[minLong, minLat, maxLong, maxLat]`  or `[longPercent, latPercent]`, in this case increases the size of the grid by `longPercent,latPercent` from extreme points
+ - `units` - default `["meters","meters"]`, can be `[cellSizeUnits,distanceUnits]`, where `cellSizeUnits` - output grid cell size, `distanceUnits` - units of distance in IDW method. If you set only  `"degrees"` it equal `["degrees","degrees"]`, with meters as well
+ - `exponent` - default `2`,  exponent of distance in IDW method
+ - `mask` - grid to adjust the weight of each point in each cell, `{grid,latCellSize,longCellSize,bbox,noData}`, converting from GeoJSON or Esri ASCII, see [converters](##Converters)
+ - `boundaries` - using only with mask, array of reference `values` which increases or decreases weight by some `x` value if the mask cell differs from the cell lying on the path to the desired value, `[[value1,x1],[value2,x2]...]`
 
 ## Isobands
 
+  
+
 ## Isolines
 
+  
+
 ## Converters
+asd
+  
 
 ### ascToArray
 
+  
+
 ### pointGridToArray
+
+  
 
 ### pointsToArray

@@ -1341,20 +1341,20 @@
     };
     var Bands = [],
         BandsValue = [];
-    var lower_h = intervals[0],
-        upper_h = Infinity;
+    var lower_h = -Infinity,
+        upper_h = intervals[0];
     Bands.push(toLine(computeIsobands(grid.grid, lower_h, upper_h)));
-    BandsValue.push(intervals[0] + "<");
+    BandsValue.push("<" + intervals[0]);
 
     for (var i = 0; i < intervals.length - 1; i++) {
-      lower_h = intervals[i + 1], upper_h = intervals[i];
+      lower_h = intervals[i], upper_h = intervals[i + 1];
       Bands.push(toLine(computeIsobands(grid.grid, lower_h, upper_h)));
       BandsValue.push(lower_h + "-" + upper_h);
     }
 
-    lower_h = -Infinity, upper_h = intervals[intervals.length - 1];
+    lower_h = intervals[intervals.length - 1], upper_h = Infinity;
     Bands.push(toLine(computeIsobands(grid.grid, lower_h, upper_h)));
-    BandsValue.push("<" + intervals[intervals.length - 1]);
+    BandsValue.push(intervals[intervals.length - 1] + "<");
     var newBands = [];
 
     for (var _i = 0; _i < Bands.length; _i++) {
@@ -1575,6 +1575,7 @@
       "type": "FeatureCollection",
       "features": []
     };
+    intervals.reverse();
 
     for (var i = 0; i < intervals.length; i++) {
       var h = intervals[i];
