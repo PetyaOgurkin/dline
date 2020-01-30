@@ -1575,7 +1575,6 @@
       "type": "FeatureCollection",
       "features": []
     };
-    intervals.reverse();
 
     for (var i = 0; i < intervals.length; i++) {
       var h = intervals[i];

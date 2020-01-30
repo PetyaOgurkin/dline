@@ -6,6 +6,12 @@
     "dev": "rollup -c --watch",
     "build": "rollup -c"
   },
+  "keywords": [
+    "geospatial analysis",
+    "interpolation",
+    "isolines",
+    "isobands"
+  ],
   "repository": "github:PetyaOgurkin/dline",
   "author": "PetyaOgurkin",
   "license": "MIT",
