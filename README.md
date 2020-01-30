@@ -77,5 +77,5 @@ Uses [Marching squares](https://en.wikipedia.org/wiki/Marching_squares) algorith
 #### Example
 ```
 const  points = // some random points
-dline.isobands(dline.IDW(points,500),[1,2,3,4,5])
+const  bands = dline.isobands(dline.IDW(points,500),[1,2,3,4,5])
 ```
