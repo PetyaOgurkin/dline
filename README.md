@@ -27,7 +27,7 @@ saasdasdads
  - `bbox` - default `[0,0]`, can be an ordinary bbox like `[minLong, minLat, maxLong, maxLat]`  or `[longPercent, latPercent]`, in this case increases the size of the grid by `longPercent,latPercent` from extreme points
  - `units` - default `["meters","meters"]`, can be `[cellSizeUnits,distanceUnits]`, where `cellSizeUnits` - output grid cell size, `distanceUnits` - units of distance in IDW method. If you set only  `"degrees"` it equal `["degrees","degrees"]`, with meters as well
  - `exponent` - default `2`,  exponent of distance in IDW method
- - `mask` - grid to adjust the weight of each point in each cell, `{grid,latCellSize,longCellSize,bbox,noData}`, converting from GeoJSON or Esri ASCII, see [converters](##Converters)
+ - `mask` - grid to adjust the weight of each point in each cell, `{grid,latCellSize,longCellSize,bbox,noData}`, converting from GeoJSON or Esri ASCII, see [converters](#converters)
  - `boundaries` - using only with mask, array of reference `values` which increases or decreases weight by some `x` value if the mask cell differs from the cell lying on the path to the desired value, `[[value1,x1],[value2,x2]...]`
 
 ## Isobands
