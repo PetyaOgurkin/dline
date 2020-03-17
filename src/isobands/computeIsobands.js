@@ -1,6 +1,7 @@
 export default function computeIsobands(grid, low, up) {
 
-    const interpolate = (p1, p2, c) => p1 > c ? ((c + 0.0001) - p2) / (p1 - p2) : ((c + 0.0001) - p1) / (p2 - p1);
+    const interpolate = (p1, p2, c) => p1 > c ? (c - p2) / (p1 - p2) : (c - p1) / (p2 - p1);
+
 
     /* values of vertexes */
     const A = (x, y) => grid[x + 1][y];
@@ -190,50 +191,50 @@ export default function computeIsobands(grid, low, up) {
 
             case "2120":
                 o = getCenterOfCell(x, y);
-                if (o === 1) isobands.push(edges("a+", x, y, up), edges("c+", x, y, up), edges("d-", x, y, low));
+                if (o === 0 || o === 1) isobands.push(edges("a+", x, y, up), edges("c+", x, y, up), edges("d-", x, y, low));
                 else if (o === 2) isobands.push(edges("b-", x, y, up), edges("d-", x, y, up), edges("d-", x, y, low));
                 break;
 
             case "2021":
                 o = getCenterOfCell(x, y);
-                if (o === 1) isobands.push(edges("a+", x, y, up), edges("b-", x, y, low), edges("c+", x, y, up));
+                if (o === 0 || o === 1) isobands.push(edges("a+", x, y, up), edges("b-", x, y, low), edges("c+", x, y, up));
                 else if (o === 2) isobands.push(edges("b-", x, y, up), edges("b-", x, y, low), edges("d-", x, y, up));
                 break;
 
             case "1202":
                 o = getCenterOfCell(x, y);
-                if (o === 1) isobands.push(edges("b+", x, y, up), edges("c-", x, y, low), edges("d+", x, y, up));
+                if (o === 0 || o === 1) isobands.push(edges("b+", x, y, up), edges("c-", x, y, low), edges("d+", x, y, up));
                 else if (o === 2) isobands.push(edges("a-", x, y, up), edges("c-", x, y, up), edges("c-", x, y, low));
                 break;
 
             case "0212":
                 o = getCenterOfCell(x, y);
-                if (o === 1) isobands.push(edges("a-", x, y, low), edges("b+", x, y, up), edges("d+", x, y, up));
+                if (o === 0 || o === 1) isobands.push(edges("a-", x, y, low), edges("b+", x, y, up), edges("d+", x, y, up));
                 else if (o === 2) isobands.push(edges("a-", x, y, up), edges("a-", x, y, low), edges("c-", x, y, up));
                 break;
 
             case "0102":
                 o = getCenterOfCell(x, y);
                 if (o === 0) isobands.push(edges("b+", x, y, low), edges("d+", x, y, up), edges("d+", x, y, low));
-                else if (o === 1) isobands.push(edges("a-", x, y, low), edges("c-", x, y, low), edges("d+", x, y, up));
+                else if (o === 1 || o === 2) isobands.push(edges("a-", x, y, low), edges("c-", x, y, low), edges("d+", x, y, up));
                 break;
 
             case "0201":
                 o = getCenterOfCell(x, y);
                 if (o === 0) isobands.push(edges("b+", x, y, up), edges("b+", x, y, low), edges("d+", x, y, low));
-                else if (o === 1) isobands.push(edges("a-", x, y, low), edges("b+", x, y, up), edges("c-", x, y, low));
+                else if (o === 1 || o === 2) isobands.push(edges("a-", x, y, low), edges("b+", x, y, up), edges("c-", x, y, low));
                 break;
 
             case "1020":
                 o = getCenterOfCell(x, y);
                 if (o === 0) isobands.push(edges("a+", x, y, low), edges("c+", x, y, up), edges("c+", x, y, low));
-                else if (o === 1) isobands.push(edges("b-", x, y, low), edges("c+", x, y, up), edges("d-", x, y, low));
+                else if (o === 1 || o === 2) isobands.push(edges("b-", x, y, low), edges("c+", x, y, up), edges("d-", x, y, low));
                 break;
 
             case "2010":
                 o = getCenterOfCell(x, y);
                 if (o === 0) isobands.push(edges("a+", x, y, up), edges("a+", x, y, low), edges("c+", x, y, low));
-                else if (o === 1) isobands.push(edges("a+", x, y, up), edges("b-", x, y, low), edges("d-", x, y, low));
+                else if (o === 1 || o === 2) isobands.push(edges("a+", x, y, up), edges("b-", x, y, low), edges("d-", x, y, low));
                 break;
 
             default:
@@ -358,7 +359,7 @@ export default function computeIsobands(grid, low, up) {
 
     const isobands = [];
 
-    /* walk on the grid and computing conture */
+    /* walk on the grid and computing contour */
     for (let i = 0, len = grid.length - 1; i < len; i++) {
         for (let j = 0, len1 = grid[i].length - 1; j < len1; j++) {
 

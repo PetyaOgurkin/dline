@@ -6,13 +6,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>dline demo</title>
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.2.1/css/ol.css" type="text/css">
 
+    <script defer
+        src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.2.1/build/ol.js"></script>
     <script defer src="../node_modules/leaflet/dist/leaflet.js"></script>
     <script defer src="../dist/dline.js"></script>
     <script defer src="index.js"></script>
 
+
+
+
     <link rel="stylesheet" href="../node_modules/leaflet/dist/leaflet.css">
-    
+
     <style>
         .map {
             width: 1280px;
@@ -23,9 +30,13 @@
 
 <body>
     <div id="map" class="map"></div>
-    <button onclick="bands()">randomBands</button>
-    <button onclick="bandsWithMask()">bandsWithMask</button>
-    <button onclick="srtm()">srtm</button>
+    <div>
+        <button onclick="go()">randomBands</button>
+        <button onclick="bandsWithMask()">bandsWithMask</button>
+        <button onclick="srtm()">srtm</button>
+        <button onclick="addIDW()">IDW</button>
+    </div>
+
 </body>
 
 </html>

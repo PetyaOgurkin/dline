@@ -9,6 +9,7 @@ function IDW(points, cellSize, options = {}) {
     const { bbox, units, exponent, mask, lowerIntervals, upperIntervals } = optionsParser(options, points);
 
     const { latSize, longSize, latCellSize, longCellSize } = cellSizes(bbox, cellSize, units[0]);
+    const masks = [];
 
     let grid;
     if (units[1] === 'degrees') {
@@ -16,6 +17,9 @@ function IDW(points, cellSize, options = {}) {
             if (bbox[0] >= mask.bbox[0] && bbox[1] >= mask.bbox[1] && bbox[2] <= mask.bbox[2] && bbox[3] <= mask.bbox[3]) {
                 grid = calculate(caseWithMaskDegrees, getPointsForDegreesGrid(points));
             } else {
+
+                console.log(bbox, mask.bbox);
+
                 throw new Error('mask shoud be bigger then bbox');
             }
 
@@ -27,6 +31,8 @@ function IDW(points, cellSize, options = {}) {
             if (bbox[0] >= mask.bbox[0] && bbox[1] >= mask.bbox[1] && bbox[2] <= mask.bbox[2] && bbox[3] <= mask.bbox[3]) {
                 grid = calculate(caseWithMaskMeters, points);
             } else {
+
+                console.log(bbox, mask.bbox);
                 throw new Error('mask shoud be bigger then bbox');
             }
 
@@ -35,14 +41,18 @@ function IDW(points, cellSize, options = {}) {
         }
     }
 
-    return { grid, latCellSize, longCellSize, bbox, toAsc, toGeoJson }
+
+
+    return { grid, latCellSize, longCellSize, bbox, toAsc, toGeoJson, masks }
 
     function calculate(theCase, points) {
         const grid = [];
         for (let i = 0; i < latSize; i++) {
             grid[i] = [];
+            masks[i] = [];
             for (let j = 0; j < longSize; j++) {
                 grid[i][j] = theCase(points, i, j);
+
             }
         }
         return grid
@@ -52,12 +62,18 @@ function IDW(points, cellSize, options = {}) {
         const cellCenter = [i + 0.5, j + 0.5];
         let top = 0, bot = 0;
 
-        points.forEach((point, index) => {
+        for (let index = 0; index < points.length; index++) {
             const weight = getWeight(i, j, index);
-            const d = Math.sqrt(((cellCenter[0] - point[0]) ** 2 + (cellCenter[1] - point[1]) ** 2));
-            top += point[2] / d ** (exponent + weight);
-            bot += 1 / d ** (exponent + weight);
-        })
+
+            const d = Math.sqrt(((cellCenter[0] - points[index][0]) ** 2 + (cellCenter[1] - points[index][1]) ** 2));
+
+            if (d === 0) return points[index][2];
+            masks[i][j] = (weight);
+            const w = d ** -(exponent + weight);
+            top += points[index][2] * w;
+            bot += w;
+        }
+
         return top / bot;
     }
 
@@ -65,11 +81,16 @@ function IDW(points, cellSize, options = {}) {
         const cellCenter = [i + 0.5, j + 0.5];
         let top = 0, bot = 0;
 
-        points.forEach(point => {
-            const d = Math.sqrt(((cellCenter[0] - point[0]) ** 2 + (cellCenter[1] - point[1]) ** 2));
-            top += point[2] / d ** exponent;
-            bot += 1 / d ** exponent;
-        })
+        for (let index = 0; index < points.length; index++) {
+            const d = Math.sqrt(((cellCenter[0] - points[index][0]) ** 2 + (cellCenter[1] - points[index][1]) ** 2));
+
+            if (d === 0) return points[index][2];
+
+            const w = d ** -exponent;
+            top += points[index][2] * w;
+            bot += w;
+        }
+
         return top / bot;
     }
 
@@ -77,12 +98,17 @@ function IDW(points, cellSize, options = {}) {
         const cellCenter = [bbox[1] + (i + 0.5) * latCellSize, bbox[0] + (j + 0.5) * longCellSize];
         let top = 0, bot = 0;
 
-        points.forEach((point, index) => {
+        for (let index = 0; index < points.length; index++) {
             const weight = getWeight(i, j, index);
-            const d = distance(point, cellCenter);
-            top += point[2] / d ** (exponent + weight);
-            bot += 1 / d ** (exponent + weight);
-        })
+            const d = distance(points[index], cellCenter);
+
+            if (d === 0) return points[index][2];
+
+            const w = d ** -(exponent + weight);
+            top += points[index][2] * w;
+            bot += w;
+        }
+
         return top / bot;
     }
 
@@ -90,11 +116,15 @@ function IDW(points, cellSize, options = {}) {
         const cellCenter = [bbox[1] + (i + 0.5) * latCellSize, bbox[0] + (j + 0.5) * longCellSize];
         let top = 0, bot = 0;
 
-        points.forEach(point => {
-            const d = distance(point, cellCenter);
-            top += point[2] / d ** exponent;
-            bot += 1 / d ** exponent;
-        })
+        for (let index = 0; index < points.length; index++) {
+            const d = distance(points[index], cellCenter);
+
+            if (d === 0) return points[index][2];
+
+            const w = d ** -exponent;
+            top += points[index][2] * w;
+            bot += w;
+        }
         return top / bot;
     }
 
@@ -114,6 +144,7 @@ function IDW(points, cellSize, options = {}) {
         const p2Lat = Math.floor(Math.abs(mask.bbox[1] - (i * latCellSize + bbox[1])) / mask.latCellSize);
 
         const route = way(p1Lat, p1Long, p2Lat, p2Long);
+
 
         let weight = 0;
         route.forEach(c => {
@@ -140,7 +171,6 @@ function IDW(points, cellSize, options = {}) {
                 }
             }
         })
-
         return weight;
     }
 

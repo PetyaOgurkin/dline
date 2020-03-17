@@ -295,6 +295,7 @@
         latCellSize = _cellSizes.latCellSize,
         longCellSize = _cellSizes.longCellSize;
 
+    var masks = [];
     var grid;
 
     if (units[1] === 'degrees') {
@@ -302,6 +303,7 @@
         if (bbox[0] >= mask.bbox[0] && bbox[1] >= mask.bbox[1] && bbox[2] <= mask.bbox[2] && bbox[3] <= mask.bbox[3]) {
           grid = calculate(caseWithMaskDegrees, getPointsForDegreesGrid(points));
         } else {
+          console.log(bbox, mask.bbox);
           throw new Error('mask shoud be bigger then bbox');
         }
       } else {
@@ -312,6 +314,7 @@
         if (bbox[0] >= mask.bbox[0] && bbox[1] >= mask.bbox[1] && bbox[2] <= mask.bbox[2] && bbox[3] <= mask.bbox[3]) {
           grid = calculate(caseWithMaskMeters, points);
         } else {
+          console.log(bbox, mask.bbox);
           throw new Error('mask shoud be bigger then bbox');
         }
       } else {
@@ -325,7 +328,8 @@
       longCellSize: longCellSize,
       bbox: bbox,
       toAsc: toAsc,
-      toGeoJson: toGeoJson
+      toGeoJson: toGeoJson,
+      masks: masks
     };
 
     function calculate(theCase, points) {
@@ -333,6 +337,7 @@
 
       for (var i = 0; i < latSize; i++) {
         grid[i] = [];
+        masks[i] = [];
 
         for (var j = 0; j < longSize; j++) {
           grid[i][j] = theCase(points, i, j);
@@ -346,12 +351,17 @@
       var cellCenter = [i + 0.5, j + 0.5];
       var top = 0,
           bot = 0;
-      points.forEach(function (point, index) {
+
+      for (var index = 0; index < points.length; index++) {
         var weight = getWeight(i, j, index);
-        var d = Math.sqrt(Math.pow(cellCenter[0] - point[0], 2) + Math.pow(cellCenter[1] - point[1], 2));
-        top += point[2] / Math.pow(d, exponent + weight);
-        bot += 1 / Math.pow(d, exponent + weight);
-      });
+        var d = Math.sqrt(Math.pow(cellCenter[0] - points[index][0], 2) + Math.pow(cellCenter[1] - points[index][1], 2));
+        if (d === 0) return points[index][2];
+        masks[i][j] = weight;
+        var w = Math.pow(d, -(exponent + weight));
+        top += points[index][2] * w;
+        bot += w;
+      }
+
       return top / bot;
     }
 
@@ -359,11 +369,15 @@
       var cellCenter = [i + 0.5, j + 0.5];
       var top = 0,
           bot = 0;
-      points.forEach(function (point) {
-        var d = Math.sqrt(Math.pow(cellCenter[0] - point[0], 2) + Math.pow(cellCenter[1] - point[1], 2));
-        top += point[2] / Math.pow(d, exponent);
-        bot += 1 / Math.pow(d, exponent);
-      });
+
+      for (var index = 0; index < points.length; index++) {
+        var d = Math.sqrt(Math.pow(cellCenter[0] - points[index][0], 2) + Math.pow(cellCenter[1] - points[index][1], 2));
+        if (d === 0) return points[index][2];
+        var w = Math.pow(d, -exponent);
+        top += points[index][2] * w;
+        bot += w;
+      }
+
       return top / bot;
     }
 
@@ -371,12 +385,16 @@
       var cellCenter = [bbox[1] + (i + 0.5) * latCellSize, bbox[0] + (j + 0.5) * longCellSize];
       var top = 0,
           bot = 0;
-      points.forEach(function (point, index) {
+
+      for (var index = 0; index < points.length; index++) {
         var weight = getWeight(i, j, index);
-        var d = distance(point, cellCenter);
-        top += point[2] / Math.pow(d, exponent + weight);
-        bot += 1 / Math.pow(d, exponent + weight);
-      });
+        var d = distance(points[index], cellCenter);
+        if (d === 0) return points[index][2];
+        var w = Math.pow(d, -(exponent + weight));
+        top += points[index][2] * w;
+        bot += w;
+      }
+
       return top / bot;
     }
 
@@ -384,11 +402,15 @@
       var cellCenter = [bbox[1] + (i + 0.5) * latCellSize, bbox[0] + (j + 0.5) * longCellSize];
       var top = 0,
           bot = 0;
-      points.forEach(function (point) {
-        var d = distance(point, cellCenter);
-        top += point[2] / Math.pow(d, exponent);
-        bot += 1 / Math.pow(d, exponent);
-      });
+
+      for (var index = 0; index < points.length; index++) {
+        var d = distance(points[index], cellCenter);
+        if (d === 0) return points[index][2];
+        var w = Math.pow(d, -exponent);
+        top += points[index][2] * w;
+        bot += w;
+      }
+
       return top / bot;
     }
 
@@ -698,7 +720,7 @@
 
   function computeIsobands(grid, low, up) {
     var interpolate = function interpolate(p1, p2, c) {
-      return p1 > c ? (c + 0.0001 - p2) / (p1 - p2) : (c + 0.0001 - p1) / (p2 - p1);
+      return p1 > c ? (c - p2) / (p1 - p2) : (c - p1) / (p2 - p1);
     };
     /* values of vertexes */
 
@@ -1102,42 +1124,42 @@
 
         case "2120":
           o = getCenterOfCell(x, y);
-          if (o === 1) isobands.push(edges("a+", x, y, up), edges("c+", x, y, up), edges("d-", x, y, low));else if (o === 2) isobands.push(edges("b-", x, y, up), edges("d-", x, y, up), edges("d-", x, y, low));
+          if (o === 0 || o === 1) isobands.push(edges("a+", x, y, up), edges("c+", x, y, up), edges("d-", x, y, low));else if (o === 2) isobands.push(edges("b-", x, y, up), edges("d-", x, y, up), edges("d-", x, y, low));
           break;
 
         case "2021":
           o = getCenterOfCell(x, y);
-          if (o === 1) isobands.push(edges("a+", x, y, up), edges("b-", x, y, low), edges("c+", x, y, up));else if (o === 2) isobands.push(edges("b-", x, y, up), edges("b-", x, y, low), edges("d-", x, y, up));
+          if (o === 0 || o === 1) isobands.push(edges("a+", x, y, up), edges("b-", x, y, low), edges("c+", x, y, up));else if (o === 2) isobands.push(edges("b-", x, y, up), edges("b-", x, y, low), edges("d-", x, y, up));
           break;
 
         case "1202":
           o = getCenterOfCell(x, y);
-          if (o === 1) isobands.push(edges("b+", x, y, up), edges("c-", x, y, low), edges("d+", x, y, up));else if (o === 2) isobands.push(edges("a-", x, y, up), edges("c-", x, y, up), edges("c-", x, y, low));
+          if (o === 0 || o === 1) isobands.push(edges("b+", x, y, up), edges("c-", x, y, low), edges("d+", x, y, up));else if (o === 2) isobands.push(edges("a-", x, y, up), edges("c-", x, y, up), edges("c-", x, y, low));
           break;
 
         case "0212":
           o = getCenterOfCell(x, y);
-          if (o === 1) isobands.push(edges("a-", x, y, low), edges("b+", x, y, up), edges("d+", x, y, up));else if (o === 2) isobands.push(edges("a-", x, y, up), edges("a-", x, y, low), edges("c-", x, y, up));
+          if (o === 0 || o === 1) isobands.push(edges("a-", x, y, low), edges("b+", x, y, up), edges("d+", x, y, up));else if (o === 2) isobands.push(edges("a-", x, y, up), edges("a-", x, y, low), edges("c-", x, y, up));
           break;
 
         case "0102":
           o = getCenterOfCell(x, y);
-          if (o === 0) isobands.push(edges("b+", x, y, low), edges("d+", x, y, up), edges("d+", x, y, low));else if (o === 1) isobands.push(edges("a-", x, y, low), edges("c-", x, y, low), edges("d+", x, y, up));
+          if (o === 0) isobands.push(edges("b+", x, y, low), edges("d+", x, y, up), edges("d+", x, y, low));else if (o === 1 || o === 2) isobands.push(edges("a-", x, y, low), edges("c-", x, y, low), edges("d+", x, y, up));
           break;
 
         case "0201":
           o = getCenterOfCell(x, y);
-          if (o === 0) isobands.push(edges("b+", x, y, up), edges("b+", x, y, low), edges("d+", x, y, low));else if (o === 1) isobands.push(edges("a-", x, y, low), edges("b+", x, y, up), edges("c-", x, y, low));
+          if (o === 0) isobands.push(edges("b+", x, y, up), edges("b+", x, y, low), edges("d+", x, y, low));else if (o === 1 || o === 2) isobands.push(edges("a-", x, y, low), edges("b+", x, y, up), edges("c-", x, y, low));
           break;
 
         case "1020":
           o = getCenterOfCell(x, y);
-          if (o === 0) isobands.push(edges("a+", x, y, low), edges("c+", x, y, up), edges("c+", x, y, low));else if (o === 1) isobands.push(edges("b-", x, y, low), edges("c+", x, y, up), edges("d-", x, y, low));
+          if (o === 0) isobands.push(edges("a+", x, y, low), edges("c+", x, y, up), edges("c+", x, y, low));else if (o === 1 || o === 2) isobands.push(edges("b-", x, y, low), edges("c+", x, y, up), edges("d-", x, y, low));
           break;
 
         case "2010":
           o = getCenterOfCell(x, y);
-          if (o === 0) isobands.push(edges("a+", x, y, up), edges("a+", x, y, low), edges("c+", x, y, low));else if (o === 1) isobands.push(edges("a+", x, y, up), edges("b-", x, y, low), edges("d-", x, y, low));
+          if (o === 0) isobands.push(edges("a+", x, y, up), edges("a+", x, y, low), edges("c+", x, y, low));else if (o === 1 || o === 2) isobands.push(edges("a+", x, y, up), edges("b-", x, y, low), edges("d-", x, y, low));
           break;
       }
     }
@@ -1309,7 +1331,7 @@
     }
 
     var isobands = [];
-    /* walk on the grid and computing conture */
+    /* walk on the grid and computing contour */
 
     for (var i = 0, len = grid.length - 1; i < len; i++) {
       for (var j = 0, len1 = grid[i].length - 1; j < len1; j++) {

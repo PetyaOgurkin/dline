@@ -1,7 +1,7 @@
 /* из пар точек делает последовательность */
 
 export default function toLine(couples) {
-
+    
     const tmp = [];
     let endFlag = true;
     while (couples.length > 0) {
