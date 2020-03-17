@@ -181,7 +181,7 @@ const map = new ol.Map({
 });
 
 
-function go() {
+async function go() {
 
 
     map.getLayers().forEach(function (layer) {
@@ -192,24 +192,24 @@ function go() {
     const rand = (min, max) => Math.random() * (max - min) + min;
 
     const points = [];
-    for (let i = 0; i < 150; i++) {
+    for (let i = 0; i < 50; i++) {
         points.push([rand(55.9, 56.1), rand(92.6, 93.1), rand(0, 0.7)])
     }
 
     // const breaks = [0.05, 0.1, 0.15, 0.2, 0.3, 0.6];
 
-  /*   const cout = {
-        "<0.05": "#00CC00",
-        "0.05-0.1": "#FFFF00",
-        "0.1-0.15": "#FFAA00",
-        "0.15-0.2": "#FF1300",
-        "0.2-0.3": "#C30083",
-        "0.3-0.6": "#2C17B1",
-        "0.6<": "#000000"
-    }; */
+    /*   const cout = {
+          "<0.05": "#00CC00",
+          "0.05-0.1": "#FFFF00",
+          "0.1-0.15": "#FFAA00",
+          "0.15-0.2": "#FF1300",
+          "0.2-0.3": "#C30083",
+          "0.3-0.6": "#2C17B1",
+          "0.6<": "#000000"
+      }; */
 
-    const breaks = [0, 0.0500, 0.0525, 0.0550, 0.0575, 0.0600, 0.0625, 0.0650, 0.0675, 0.0700, 0.0725, 0.0750, 0.0775, 0.0800, 0.0825, 0.0850, 0.0875, 0.0900, 0.0925, 0.0950, 0.0975, 0.1000, 0.1025, 0.1050, 0.1075, 0.1100, 0.1125, 0.1150, 0.1175, 0.1200, 0.1225, 0.1250, 0.1275, 0.1300, 0.1325, 0.1350, 0.1375, 0.1400, 0.1425, 0.1450, 0.1475, 0.1500, 0.1525, 0.1550, 0.1575, 0.1600, 0.1625, 0.1650, 0.1675, 0.1700, 0.1725, 0.1750, 0.1775, 0.1800, 0.1825, 0.1850, 0.1875, 0.1900, 0.1925, 0.1950, 0.1975, 0.2000, 0.2050, 0.2100, 0.2150, 0.2200, 0.2250, 0.2300, 0.2350, 0.2400, 0.2450, 0.2500, 0.2550, 0.2600, 0.2650, 0.2700, 0.2750, 0.2800, 0.2850, 0.2900, 0.2950, 0.3000, 0.3150, 0.3300, 0.3450, 0.3600, 0.3750, 0.3900, 0.4050, 0.4200, 0.4350, 0.4500, 0.4650, 0.4800, 0.4950, 0.5100, 0.5250, 0.5400, 0.5550, 0.5700, 0.5850, 0.6000, 1];
-    const colors = [ "0c9c63", "199f60", "26a35e", "33a65b", "3faa59", "4cad56", "59b154", "65b451", "72b84f", "7fbb4c", "8cbe49", "a5c544", "b2c942", "bfcc3f", "ccd03d", "d8d33a", "f2da35", "ffde32",
+   /*  const breaks = [0, 0.0500, 0.0525, 0.0550, 0.0575, 0.0600, 0.0625, 0.0650, 0.0675, 0.0700, 0.0725, 0.0750, 0.0775, 0.0800, 0.0825, 0.0850, 0.0875, 0.0900, 0.0925, 0.0950, 0.0975, 0.1000, 0.1025, 0.1050, 0.1075, 0.1100, 0.1125, 0.1150, 0.1175, 0.1200, 0.1225, 0.1250, 0.1275, 0.1300, 0.1325, 0.1350, 0.1375, 0.1400, 0.1425, 0.1450, 0.1475, 0.1500, 0.1525, 0.1550, 0.1575, 0.1600, 0.1625, 0.1650, 0.1675, 0.1700, 0.1725, 0.1750, 0.1775, 0.1800, 0.1825, 0.1850, 0.1875, 0.1900, 0.1925, 0.1950, 0.1975, 0.2000, 0.2050, 0.2100, 0.2150, 0.2200, 0.2250, 0.2300, 0.2350, 0.2400, 0.2450, 0.2500, 0.2550, 0.2600, 0.2650, 0.2700, 0.2750, 0.2800, 0.2850, 0.2900, 0.2950, 0.3000, 0.3150, 0.3300, 0.3450, 0.3600, 0.3750, 0.3900, 0.4050, 0.4200, 0.4350, 0.4500, 0.4650, 0.4800, 0.4950, 0.5100, 0.5250, 0.5400, 0.5550, 0.5700, 0.5850, 0.6000, 1];
+    const colors = ["0c9c63", "199f60", "26a35e", "33a65b", "3faa59", "4cad56", "59b154", "65b451", "72b84f", "7fbb4c", "8cbe49", "a5c544", "b2c942", "bfcc3f", "ccd03d", "d8d33a", "f2da35", "ffde32",
         "ffd733", "ffd333", "ffd033", "ffc932", "ffc533", "ffc233", "ffbe33", "ffbb33", "ffb833", "ffb433", "ffb133", "ffad33", "ffa633", "ffa333", "ff9f33", "ff9c33", "ff9833",
         "f98933", "f78233", "f47a33", "ef6b32", "ed6333", "ea5b33", "e85433", "e54c33", "e24433", "e03d33", "dd3533", "db2d33", "d61e33", "d31633", "d10f33", "ce0733", "cc0033",
         "c1003d", "bc0042", "b70047", "ad0051", "a80056", "a3005b", "9e0060", "990065", "93006b", "8e0070", "890075", "84007a", "7f007f", "7a0084", "750089", "70008e", "6b0093", "650099",
@@ -224,20 +224,55 @@ function go() {
     for (let i = 0; i < breaks.length - 1; i++) {
 
         cout[breaks[i] + "-" + breaks[i + 1]] = "#" + colors[i];
-    }
+    } */
 
-
-    const idw = dline.IDW(points, 1500, { exponent: 4, units: ['meters', 'degrees'], })/* .toGeoJson() */;
-
-
-
+    console.time('req')
+    const mask = dline.ascToArray(await fetch('./krs_cut.asc').then(res => res.text()));
+    console.timeEnd('req')
 
 
 
-    console.time('asd');
+    console.time('srtm')
+    const bands = dline.isobands(mask, [140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 340, 360, 380, 400, 450, 500]);
+    console.timeEnd('srtm')
+
+    const cout = {
+        "<140": "#1240AB",
+        "140-160": "#0B61A4",
+        "160-180": "#009999",
+        "180-200": "#00AE68",
+        "200-220": "#00CC00",
+        "220-240": "#5DE100",
+        "240-260": "#9BED00",
+        "260-280": "#CCF600",
+        "280-300": "#FFFF00",
+        "300-320": "#FFE800",
+        "320-340": "#FFD300",
+        "340-360": "#FFBF00",
+        "360-380": "#FFAA00",
+        "380-400": "#FF9200",
+        "400-450": "#FF7100",
+        "450-500": "#FF4900",
+        "500<": "#FF0000",
+    };
+
+
+
+
+
+
+    /* console.time('IDW with mask')
+    const idw = dline.IDW(points, 700, { bbox: [10, 10], exponent: 3, units: ['meters', 'degrees'], mask, boundaries: [[20, 0.2], [-50, 0.1]] });
+    console.timeEnd('IDW with mask')
+ */
+    /*   console.time('IDW')
+      const idw = dline.IDW(points, 700, { bbox: [10, 10], exponent: 3, units: ['meters', 'degrees'], });
+      console.timeEnd('IDW')
+   */
+    /* console.time('asd');
     // const bands = turf.isobands(idw, breaks, { zProperty: 'value' });
     const bands = dline.isobands(idw, breaks);
-    console.timeEnd('asd');
+    console.timeEnd('asd'); */
 
     let vectorSourceP = new ol.source.Vector({
         features: (new ol.format.GeoJSON({
@@ -257,17 +292,17 @@ function go() {
         stroke: new ol.style.Stroke({ width: 0, color: cout[e.values_.value] })
     }))
 
-   /*  let sP = new ol.source.Vector({
-        features: (new ol.format.GeoJSON({
-            featureProjection: 'EPSG:3857',
-            dataProjection: 'EPSG:4326'
-        })).readFeatures(idw.toGeoJson())
-    })
-
-    let lP = new ol.layer.Vector({
-        source: sP,
-        name: 'band'
-    }); */
+    /*  let sP = new ol.source.Vector({
+         features: (new ol.format.GeoJSON({
+             featureProjection: 'EPSG:3857',
+             dataProjection: 'EPSG:4326'
+         })).readFeatures(idw.toGeoJson())
+     })
+ 
+     let lP = new ol.layer.Vector({
+         source: sP,
+         name: 'band'
+     }); */
 
     map.addLayer(vectorLayerP);
     // map.addLayer(lP);

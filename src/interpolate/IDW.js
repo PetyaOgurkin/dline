@@ -9,7 +9,6 @@ function IDW(points, cellSize, options = {}) {
     const { bbox, units, exponent, mask, lowerIntervals, upperIntervals } = optionsParser(options, points);
 
     const { latSize, longSize, latCellSize, longCellSize } = cellSizes(bbox, cellSize, units[0]);
-    const masks = [];
 
     let grid;
     if (units[1] === 'degrees') {
@@ -43,16 +42,14 @@ function IDW(points, cellSize, options = {}) {
 
 
 
-    return { grid, latCellSize, longCellSize, bbox, toAsc, toGeoJson, masks }
+    return { grid, latCellSize, longCellSize, bbox, toAsc, toGeoJson }
 
     function calculate(theCase, points) {
         const grid = [];
         for (let i = 0; i < latSize; i++) {
             grid[i] = [];
-            masks[i] = [];
             for (let j = 0; j < longSize; j++) {
                 grid[i][j] = theCase(points, i, j);
-
             }
         }
         return grid
@@ -63,12 +60,12 @@ function IDW(points, cellSize, options = {}) {
         let top = 0, bot = 0;
 
         for (let index = 0; index < points.length; index++) {
+
             const weight = getWeight(i, j, index);
 
             const d = Math.sqrt(((cellCenter[0] - points[index][0]) ** 2 + (cellCenter[1] - points[index][1]) ** 2));
 
             if (d === 0) return points[index][2];
-            masks[i][j] = (weight);
             const w = d ** -(exponent + weight);
             top += points[index][2] * w;
             bot += w;

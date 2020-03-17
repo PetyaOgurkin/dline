@@ -295,7 +295,6 @@
         latCellSize = _cellSizes.latCellSize,
         longCellSize = _cellSizes.longCellSize;
 
-    var masks = [];
     var grid;
 
     if (units[1] === 'degrees') {
@@ -328,8 +327,7 @@
       longCellSize: longCellSize,
       bbox: bbox,
       toAsc: toAsc,
-      toGeoJson: toGeoJson,
-      masks: masks
+      toGeoJson: toGeoJson
     };
 
     function calculate(theCase, points) {
@@ -337,7 +335,6 @@
 
       for (var i = 0; i < latSize; i++) {
         grid[i] = [];
-        masks[i] = [];
 
         for (var j = 0; j < longSize; j++) {
           grid[i][j] = theCase(points, i, j);
@@ -356,7 +353,6 @@
         var weight = getWeight(i, j, index);
         var d = Math.sqrt(Math.pow(cellCenter[0] - points[index][0], 2) + Math.pow(cellCenter[1] - points[index][1], 2));
         if (d === 0) return points[index][2];
-        masks[i][j] = weight;
         var w = Math.pow(d, -(exponent + weight));
         top += points[index][2] * w;
         bot += w;
