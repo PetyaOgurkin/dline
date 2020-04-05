@@ -3,7 +3,6 @@ export default function computeIsolines(grid, h) {
     const interpolate = (p1, p2) => p1 > h ? (h - p2) / (p1 - p2) : (h - p1) / (p2 - p1)
 
     /* 
-    .....................................................
     .
     A_____M_____B
     |           |
@@ -13,7 +12,6 @@ export default function computeIsolines(grid, h) {
     |___________|
     D     P     C
     .
-    .....................................................
     */
 
     const A = (x, y) => grid[x + 1][y];
@@ -28,9 +26,9 @@ export default function computeIsolines(grid, h) {
 
     const center = (x, y) => ((A(x, y) + B(x, y) + C(x, y) + D(x, y)) / 4) <= h ? 0 : 1;
 
-    const getTernaryCode = (a, b, c, d) => {
+    const getBinaryCode = (a, b, c, d) => {
         const check = v => v <= h ? "0" : "1";
-        return check(a) + check(b) + check(c) + check(d);
+        return parseInt(check(a) + check(b) + check(c) + check(d), 2);
     }
 
     function edges(way, x, y) {
@@ -61,36 +59,36 @@ export default function computeIsolines(grid, h) {
 
     for (let i = 0, len = grid.length - 1; i < len; i++) {
         for (let j = 0, len1 = grid[i].length - 1; j < len1; j++) {
-            contouring(getTernaryCode(A(i, j), B(i, j), C(i, j), D(i, j)), i, j);
+            contouring(getBinaryCode(A(i, j), B(i, j), C(i, j), D(i, j)), i, j);
         }
     }
 
     function contouring(val, x, y) {
-        if (val === "0000" || val === "1111") return;
+        if (val === 0 || val === 15) return;
 
         let o;
         switch (val) {
-            case "1110": isolines.push(edges("d-", x, y, h)); break;
-            case "0001": isolines.push(edges("d+", x, y, h)); break;
-            case "1101": isolines.push(edges("c-", x, y, h)); break;
-            case "0010": isolines.push(edges("c+", x, y, h)); break;
-            case "1011": isolines.push(edges("b-", x, y, h)); break;
-            case "0100": isolines.push(edges("b+", x, y, h)); break;
-            case "0111": isolines.push(edges("a-", x, y, h)); break;
-            case "1000": isolines.push(edges("a+", x, y, h)); break;
+            case 14: isolines.push(edges("d-", x, y, h)); break;    //  1110
+            case 1: isolines.push(edges("d+", x, y, h)); break;     //  0001
+            case 13: isolines.push(edges("c-", x, y, h)); break;    //  1101
+            case 2: isolines.push(edges("c+", x, y, h)); break;     //  0010
+            case 11: isolines.push(edges("b-", x, y, h)); break;    //  1011
+            case 4: isolines.push(edges("b+", x, y, h)); break;     //  0100
+            case 7: isolines.push(edges("a-", x, y, h)); break;     //  0111
+            case 8: isolines.push(edges("a+", x, y, h)); break;     //  1000
 
-            case "1100": isolines.push(edges("t>b", x, y, h)); break;
-            case "0011": isolines.push(edges("b>t", x, y, h)); break;
-            case "1001": isolines.push(edges("l>r", x, y, h)); break;
-            case "0110": isolines.push(edges("r>l", x, y, h)); break;
+            case 12: isolines.push(edges("t>b", x, y, h)); break;   //  1100
+            case 3: isolines.push(edges("b>t", x, y, h)); break;    //  0011
+            case 9: isolines.push(edges("l>r", x, y, h)); break;    //  1001
+            case 6: isolines.push(edges("r>l", x, y, h)); break;    //  0110
 
-            case "1010":
+            case 10:    //  1010
                 o = center(x, y);
                 if (o === 0) isolines.push(edges("a+", x, y, h), edges("c+", x, y, h));
                 else if (o === 1) isolines.push(edges("b-", x, y, h), edges("d-", x, y, h));
                 break;
 
-            case "0101":
+            case 5:     //  0101
                 o = center(x, y);
                 if (o === 0) isolines.push(edges("b+", x, y, h), edges("d+", x, y, h));
                 else if (o === 1) isolines.push(edges("a-", x, y, h), edges("c-", x, y, h));

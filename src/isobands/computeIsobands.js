@@ -16,9 +16,10 @@ export default function computeIsobands(grid, low, up) {
     const Q = (x, y, c, h) => [x + Math.abs(c - interpolate(D(x, y), A(x, y), h)), y];
 
     const getTernaryCode = (a, b, c, d) => {
-        const check = v => v <= low || Number.isNaN(v) ? '0' : (v > low && v <= up) ? '1' : '2';
+        const check = v => v <= low ? '0' : (v > low && v <= up) ? '1' : '2';
         return check(a) + check(b) + check(c) + check(d);
     }
+
 
     /* returns cells to be connected */
     function edges(way, x, y, h) {
@@ -61,8 +62,8 @@ export default function computeIsobands(grid, low, up) {
     }
 
     function getCenterOfCell(x, y) {
-        const O = ((A(x, y) + B(x, y) + C(x, y) + D(x, y)) / 4);
-        return O <= low ? 0 : O > low && O <= up ? 1 : 2
+        const o = ((A(x, y) + B(x, y) + C(x, y) + D(x, y)) / 4);
+        return o <= low ? 0 : o > low && o <= up ? 1 : 2
     }
 
     function insideContouring(code, x, y) {
@@ -71,167 +72,167 @@ export default function computeIsobands(grid, low, up) {
         switch (code) {
 
             /* single triangle */
-            case "2221": isobands.push(edges("d-", x, y, up)); break;
-            case "1112": isobands.push(edges("d+", x, y, up)); break;
-            case "0001": isobands.push(edges("d+", x, y, low)); break;
-            case "1110": isobands.push(edges("d-", x, y, low)); break;
-            case "2212": isobands.push(edges("c-", x, y, up)); break;
-            case "1121": isobands.push(edges("c+", x, y, up)); break;
-            case "0010": isobands.push(edges("c+", x, y, low)); break;
-            case "1101": isobands.push(edges("c-", x, y, low)); break;
-            case "2122": isobands.push(edges("b-", x, y, up)); break;
-            case "1211": isobands.push(edges("b+", x, y, up)); break;
-            case "0100": isobands.push(edges("b+", x, y, low)); break;
-            case "1011": isobands.push(edges("b-", x, y, low)); break;
-            case "1222": isobands.push(edges("a-", x, y, up)); break;
-            case "2111": isobands.push(edges("a+", x, y, up)); break;
-            case "1000": isobands.push(edges("a+", x, y, low)); break;
-            case "0111": isobands.push(edges("a-", x, y, low)); break;
+            case 79: isobands.push(edges("d-", x, y, up)); break;                           // 2221
+            case 41: isobands.push(edges("d+", x, y, up)); break;                           // 1112
+            case 1: isobands.push(edges("d+", x, y, low)); break;                           // 0001
+            case 39: isobands.push(edges("d-", x, y, low)); break;                          // 1110
+            case 77: isobands.push(edges("c-", x, y, up)); break;                           // 2212
+            case 43: isobands.push(edges("c+", x, y, up)); break;                           // 1121
+            case 3: isobands.push(edges("c+", x, y, low)); break;                           // 0010
+            case 37: isobands.push(edges("c-", x, y, low)); break;                          // 1101
+            case 71: isobands.push(edges("b-", x, y, up)); break;                           // 2122
+            case 49: isobands.push(edges("b+", x, y, up)); break;                           // 1211
+            case 9: isobands.push(edges("b+", x, y, low)); break;                           // 0100
+            case 31: isobands.push(edges("b-", x, y, low)); break;                          // 1011
+            case 53: isobands.push(edges("a-", x, y, up)); break;                           // 1222
+            case 67: isobands.push(edges("a+", x, y, up)); break;                           // 2111
+            case 27: isobands.push(edges("a+", x, y, low)); break;                          // 1000
+            case 13: isobands.push(edges("a-", x, y, low)); break;                          // 0111
 
             /* single rectangle */
-            case "0011": isobands.push(edges("b>t", x, y, low)); break;
-            case "1100": isobands.push(edges("t>b", x, y, low)); break;
-            case "2211": isobands.push(edges("t>b", x, y, up)); break;
-            case "1122": isobands.push(edges("b>t", x, y, up)); break;
-            case "0110": isobands.push(edges("r>l", x, y, low)); break;
-            case "1001": isobands.push(edges("l>r", x, y, low)); break;
-            case "2112": isobands.push(edges("l>r", x, y, up)); break;
-            case "1221": isobands.push(edges("r>l", x, y, up)); break;
-            case "2200": isobands.push(edges("t>b", x, y, up), edges("t>b", x, y, low)); break;
-            case "0022": isobands.push(edges("b>t", x, y, up), edges("b>t", x, y, low)); break;
-            case "2002": isobands.push(edges("l>r", x, y, up), edges("l>r", x, y, low)); break;
-            case "0220": isobands.push(edges("r>l", x, y, up), edges("r>l", x, y, low)); break;
+            case 4: isobands.push(edges("b>t", x, y, low)); break;                          //  0011
+            case 36: isobands.push(edges("t>b", x, y, low)); break;                         //  1100
+            case 76: isobands.push(edges("t>b", x, y, up)); break;                          //  2211
+            case 44: isobands.push(edges("b>t", x, y, up)); break;                          //  1122
+            case 12: isobands.push(edges("r>l", x, y, low)); break;                         //  0110
+            case 28: isobands.push(edges("l>r", x, y, low)); break;                         //  1001
+            case 68: isobands.push(edges("l>r", x, y, up)); break;                          //  2112
+            case 52: isobands.push(edges("r>l", x, y, up)); break;                          //  1221
+            case 72: isobands.push(edges("t>b", x, y, up), edges("t>b", x, y, low)); break; //  2200
+            case 8: isobands.push(edges("b>t", x, y, up), edges("b>t", x, y, low)); break;  //  0022
+            case 56: isobands.push(edges("l>r", x, y, up), edges("l>r", x, y, low)); break; //  2002
+            case 24: isobands.push(edges("r>l", x, y, up), edges("r>l", x, y, low)); break; //  0220
 
             /* single trapezoid */
-            case "2220": isobands.push(edges("d-", x, y, up), edges("d-", x, y, low)); break;
-            case "0002": isobands.push(edges("d+", x, y, low), edges("d+", x, y, up)); break;
-            case "2202": isobands.push(edges("c-", x, y, up), edges("c-", x, y, low)); break;
-            case "0020": isobands.push(edges("c+", x, y, low), edges("c+", x, y, up)); break;
-            case "2022": isobands.push(edges("b-", x, y, up), edges("b-", x, y, low)); break;
-            case "0200": isobands.push(edges("b+", x, y, low), edges("b+", x, y, up)); break;
-            case "0222": isobands.push(edges("a-", x, y, up), edges("a-", x, y, low)); break;
-            case "2000": isobands.push(edges("a+", x, y, low), edges("a+", x, y, up)); break;
+            case 78: isobands.push(edges("d-", x, y, up), edges("d-", x, y, low)); break;   //  2220
+            case 2: isobands.push(edges("d+", x, y, low), edges("d+", x, y, up)); break;    //  0002
+            case 74: isobands.push(edges("c-", x, y, up), edges("c-", x, y, low)); break;   //  2202
+            case 6: isobands.push(edges("c+", x, y, low), edges("c+", x, y, up)); break;    //  0020
+            case 62: isobands.push(edges("b-", x, y, up), edges("b-", x, y, low)); break;   //  2022
+            case 18: isobands.push(edges("b+", x, y, low), edges("b+", x, y, up)); break;   //  0200
+            case 26: isobands.push(edges("a-", x, y, up), edges("a-", x, y, low)); break;   //  0222
+            case 54: isobands.push(edges("a+", x, y, low), edges("a+", x, y, up)); break;   //  2000
 
             /*  single pentagon */
-            case "1200": isobands.push(edges("b+", x, y, up), edges("t>b", x, y, low)); break;
-            case "0120": isobands.push(edges("c+", x, y, up), edges("r>l", x, y, low)); break;
-            case "0012": isobands.push(edges("d+", x, y, up), edges("b>t", x, y, low)); break;
-            case "2001": isobands.push(edges("a+", x, y, up), edges("l>r", x, y, low)); break;
+            case 45: isobands.push(edges("b+", x, y, up), edges("t>b", x, y, low)); break;  //  1200
+            case 15: isobands.push(edges("c+", x, y, up), edges("r>l", x, y, low)); break;  //  0120
+            case 5: isobands.push(edges("d+", x, y, up), edges("b>t", x, y, low)); break;   //  0012
+            case 55: isobands.push(edges("a+", x, y, up), edges("l>r", x, y, low)); break;  //  2001
 
-            case "1022": isobands.push(edges("b-", x, y, low), edges("b>t", x, y, up)); break;
-            case "2102": isobands.push(edges("c-", x, y, low), edges("l>r", x, y, up)); break;
-            case "2210": isobands.push(edges("d-", x, y, low), edges("t>b", x, y, up)); break;
-            case "0221": isobands.push(edges("a-", x, y, low), edges("r>l", x, y, up)); break;
+            case 35: isobands.push(edges("b-", x, y, low), edges("b>t", x, y, up)); break;  //  1022
+            case 65: isobands.push(edges("c-", x, y, low), edges("l>r", x, y, up)); break;  //  2102
+            case 75: isobands.push(edges("d-", x, y, low), edges("t>b", x, y, up)); break;  //  2210
+            case 25: isobands.push(edges("a-", x, y, low), edges("r>l", x, y, up)); break;  //  0221
 
-            case "1002": isobands.push(edges("d+", x, y, up), edges("l>r", x, y, low)); break;
-            case "2100": isobands.push(edges("a+", x, y, up), edges("t>b", x, y, low)); break;
-            case "0210": isobands.push(edges("b+", x, y, up), edges("r>l", x, y, low)); break;
-            case "0021": isobands.push(edges("c+", x, y, up), edges("b>t", x, y, low)); break;
+            case 29: isobands.push(edges("d+", x, y, up), edges("l>r", x, y, low)); break;  //  1002
+            case 63: isobands.push(edges("a+", x, y, up), edges("t>b", x, y, low)); break;  //  2100
+            case 21: isobands.push(edges("b+", x, y, up), edges("r>l", x, y, low)); break;  //  0210
+            case 7: isobands.push(edges("c+", x, y, up), edges("b>t", x, y, low)); break;   //  0021
 
-            case "1220": isobands.push(edges("d-", x, y, low), edges("r>l", x, y, up)); break;
-            case "0122": isobands.push(edges("a-", x, y, low), edges("b>t", x, y, up)); break;
-            case "2012": isobands.push(edges("b-", x, y, low), edges("l>r", x, y, up)); break;
-            case "2201": isobands.push(edges("c-", x, y, low), edges("t>b", x, y, up)); break;
+            case 51: isobands.push(edges("d-", x, y, low), edges("r>l", x, y, up)); break;  //  1220
+            case 17: isobands.push(edges("a-", x, y, low), edges("b>t", x, y, up)); break;  //  0122
+            case 59: isobands.push(edges("b-", x, y, low), edges("l>r", x, y, up)); break;  //  2012
+            case 73: isobands.push(edges("c-", x, y, low), edges("t>b", x, y, up)); break;  //  2201
 
             /* single hexagon */
-            case "0211": isobands.push(edges("a-", x, y, low), edges("b+", x, y, up)); break;
-            case "2110": isobands.push(edges("a+", x, y, up), edges("d-", x, y, low)); break;
-            case "1102": isobands.push(edges("c-", x, y, low), edges("d+", x, y, up)); break;
-            case "1021": isobands.push(edges("b-", x, y, low), edges("c+", x, y, up)); break;
+            case 22: isobands.push(edges("a-", x, y, low), edges("b+", x, y, up)); break;   //  0211
+            case 66: isobands.push(edges("a+", x, y, up), edges("d-", x, y, low)); break;   //  2110
+            case 38: isobands.push(edges("c-", x, y, low), edges("d+", x, y, up)); break;   //  1102
+            case 34: isobands.push(edges("b-", x, y, low), edges("c+", x, y, up)); break;   //  1021
 
-            case "2011": isobands.push(edges("a+", x, y, up), edges("b-", x, y, low)); break;
-            case "0112": isobands.push(edges("a-", x, y, low), edges("d+", x, y, up)); break;
-            case "1120": isobands.push(edges("c+", x, y, up), edges("d-", x, y, low)); break;
-            case "1201": isobands.push(edges("b+", x, y, up), edges("c-", x, y, low)); break;
+            case 58: isobands.push(edges("a+", x, y, up), edges("b-", x, y, low)); break;   //  2011
+            case 14: isobands.push(edges("a-", x, y, low), edges("d+", x, y, up)); break;   //  0112
+            case 42: isobands.push(edges("c+", x, y, up), edges("d-", x, y, low)); break;   //  1120
+            case 46: isobands.push(edges("b+", x, y, up), edges("c-", x, y, low)); break;   //  1201
 
-            case "2101": isobands.push(edges("a+", x, y, up), edges("c-", x, y, low)); break;
-            case "0121": isobands.push(edges("a-", x, y, low), edges("c+", x, y, up)); break;
-            case "1012": isobands.push(edges("b-", x, y, low), edges("d+", x, y, up)); break;
-            case "1210": isobands.push(edges("b+", x, y, up), edges("d-", x, y, low)); break;
+            case 64: isobands.push(edges("a+", x, y, up), edges("c-", x, y, low)); break;   //  2101
+            case 16: isobands.push(edges("a-", x, y, low), edges("c+", x, y, up)); break;   //  0121
+            case 32: isobands.push(edges("b-", x, y, low), edges("d+", x, y, up)); break;   //  1012
+            case 48: isobands.push(edges("b+", x, y, up), edges("d-", x, y, low)); break;   //  1210
 
 
             /* center */
-            case "2020":
+            case 60:    //  2020
                 o = getCenterOfCell(x, y);
                 if (o === 0) isobands.push(edges("a+", x, y, up), edges("a+", x, y, low), edges("c+", x, y, up), edges("c+", x, y, low));
                 else if (o === 1) isobands.push(edges("a+", x, y, up), edges("b-", x, y, low), edges("c+", x, y, up), edges("d-", x, y, low));
                 else if (o === 2) isobands.push(edges("b-", x, y, up), edges("b-", x, y, low), edges("d-", x, y, up), edges("d-", x, y, low));
                 break;
 
-            case "0202":
+            case 20:    //  0202
                 o = getCenterOfCell(x, y);
                 if (o === 0) isobands.push(edges("b+", x, y, up), edges("b+", x, y, low), edges("d+", x, y, up), edges("d+", x, y, low));
                 else if (o === 1) isobands.push(edges("a-", x, y, low), edges("b+", x, y, up), edges("c-", x, y, low), edges("d+", x, y, up));
                 else if (o === 2) isobands.push(edges("a-", x, y, up), edges("a-", x, y, low), edges("c-", x, y, up), edges("c-", x, y, low));
                 break;
 
-            case "0101":
+            case 10:    //  0101
                 o = getCenterOfCell(x, y);
                 if (o === 0) isobands.push(edges("b+", x, y, low), edges("d+", x, y, low));
                 else if (o === 1) isobands.push(edges("a-", x, y, low), edges("c-", x, y, low));
                 break;
 
-            case "1010":
+            case 30:    //  1010
                 o = getCenterOfCell(x, y);
                 if (o === 0) isobands.push(edges("a+", x, y, low), edges("c+", x, y, low));
                 else if (o === 1) isobands.push(edges("b-", x, y, low), edges("d-", x, y, low));
                 break;
 
-            case "2121":
+            case 70:    //  2121
                 o = getCenterOfCell(x, y);
                 if (o === 1) isobands.push(edges("a+", x, y, up), edges("c+", x, y, up));
                 else if (o === 2) isobands.push(edges("b-", x, y, up), edges("d-", x, y, up));
                 break;
 
-            case "1212":
+            case 50:    //  1212
                 o = getCenterOfCell(x, y);
                 if (o === 1) isobands.push(edges("b+", x, y, up), edges("d+", x, y, up));
                 else if (o === 2) isobands.push(edges("a-", x, y, up), edges("c-", x, y, up));
                 break;
 
-            case "2120":
+            case 69:    //  2120
                 o = getCenterOfCell(x, y);
                 if (o === 0 || o === 1) isobands.push(edges("a+", x, y, up), edges("c+", x, y, up), edges("d-", x, y, low));
                 else if (o === 2) isobands.push(edges("b-", x, y, up), edges("d-", x, y, up), edges("d-", x, y, low));
                 break;
 
-            case "2021":
+            case 61:    //  2021
                 o = getCenterOfCell(x, y);
                 if (o === 0 || o === 1) isobands.push(edges("a+", x, y, up), edges("b-", x, y, low), edges("c+", x, y, up));
                 else if (o === 2) isobands.push(edges("b-", x, y, up), edges("b-", x, y, low), edges("d-", x, y, up));
                 break;
 
-            case "1202":
+            case 47:    //  1202
                 o = getCenterOfCell(x, y);
                 if (o === 0 || o === 1) isobands.push(edges("b+", x, y, up), edges("c-", x, y, low), edges("d+", x, y, up));
                 else if (o === 2) isobands.push(edges("a-", x, y, up), edges("c-", x, y, up), edges("c-", x, y, low));
                 break;
 
-            case "0212":
+            case 23:    //  0212
                 o = getCenterOfCell(x, y);
                 if (o === 0 || o === 1) isobands.push(edges("a-", x, y, low), edges("b+", x, y, up), edges("d+", x, y, up));
                 else if (o === 2) isobands.push(edges("a-", x, y, up), edges("a-", x, y, low), edges("c-", x, y, up));
                 break;
 
-            case "0102":
+            case 11:    //  0102
                 o = getCenterOfCell(x, y);
                 if (o === 0) isobands.push(edges("b+", x, y, low), edges("d+", x, y, up), edges("d+", x, y, low));
                 else if (o === 1 || o === 2) isobands.push(edges("a-", x, y, low), edges("c-", x, y, low), edges("d+", x, y, up));
                 break;
 
-            case "0201":
+            case 19:    //  0201
                 o = getCenterOfCell(x, y);
                 if (o === 0) isobands.push(edges("b+", x, y, up), edges("b+", x, y, low), edges("d+", x, y, low));
                 else if (o === 1 || o === 2) isobands.push(edges("a-", x, y, low), edges("b+", x, y, up), edges("c-", x, y, low));
                 break;
 
-            case "1020":
+            case 33:    //  1020
                 o = getCenterOfCell(x, y);
                 if (o === 0) isobands.push(edges("a+", x, y, low), edges("c+", x, y, up), edges("c+", x, y, low));
                 else if (o === 1 || o === 2) isobands.push(edges("b-", x, y, low), edges("c+", x, y, up), edges("d-", x, y, low));
                 break;
 
-            case "2010":
+            case 57:    //  2010
                 o = getCenterOfCell(x, y);
                 if (o === 0) isobands.push(edges("a+", x, y, up), edges("a+", x, y, low), edges("c+", x, y, low));
                 else if (o === 1 || o === 2) isobands.push(edges("a+", x, y, up), edges("b-", x, y, low), edges("d-", x, y, low));
@@ -364,13 +365,14 @@ export default function computeIsobands(grid, low, up) {
         for (let j = 0, len1 = grid[i].length - 1; j < len1; j++) {
 
             const ternaryCode = getTernaryCode(A(i, j), B(i, j), C(i, j), D(i, j));
+            const decimalCode = parseInt(ternaryCode, 3);
 
-            if (ternaryCode === '0000' || ternaryCode === '2222') {
+            if (decimalCode === 0 || decimalCode === 80) {
                 continue;
             }
 
-            if (ternaryCode !== '1111') {
-                insideContouring(ternaryCode, i, j);
+            if (decimalCode !== 40) {
+                insideContouring(decimalCode, i, j);
             }
 
             const border = borderCheck(i, j);
