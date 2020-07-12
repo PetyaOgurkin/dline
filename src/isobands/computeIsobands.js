@@ -4,10 +4,12 @@ export default function computeIsobands(grid, low, up) {
 
 
     /* values of vertexes */
-    const A = (x, y) => grid[x + 1][y];
-    const B = (x, y) => grid[x + 1][y + 1];
-    const C = (x, y) => grid[x][y + 1];
-    const D = (x, y) => grid[x][y];
+
+    const A = (x, y) => grid[x + 1][y] || low;
+    const B = (x, y) => grid[x + 1][y + 1] || low;
+    const C = (x, y) => grid[x][y + 1] || low;
+    const D = (x, y) => grid[x][y] || low;
+
 
     /* coordinates of points on edges */
     const M = (x, y, c, h) => [x + 1, y + Math.abs(c - interpolate(A(x, y), B(x, y), h))];

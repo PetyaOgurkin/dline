@@ -4,7 +4,7 @@ import optionsParser from './optionsParser';
 import toAsc from '../common/toAsc';
 import toGeoJson from '../common/toGeoJson';
 
-function IDW(points, cellSize, options = {}) {
+function IDW(points, cellSize, options = {}, buffer) {
 
     const { bbox, units, exponent, mask, lowerIntervals, upperIntervals } = optionsParser(options, points);
 
@@ -61,11 +61,16 @@ function IDW(points, cellSize, options = {}) {
 
         for (let index = 0; index < points.length; index++) {
 
-            const weight = getWeight(i, j, index);
-
             const d = Math.sqrt(((cellCenter[0] - points[index][0]) ** 2 + (cellCenter[1] - points[index][1]) ** 2));
 
+            if (buffer) {
+                if (d > buffer) continue;
+            }
+
             if (d === 0) return points[index][2];
+
+            const weight = getWeight(i, j, index);
+
             const w = d ** -(exponent + weight);
             top += points[index][2] * w;
             bot += w;
@@ -88,6 +93,7 @@ function IDW(points, cellSize, options = {}) {
             bot += w;
         }
 
+
         return top / bot;
     }
 
@@ -96,12 +102,14 @@ function IDW(points, cellSize, options = {}) {
         let top = 0, bot = 0;
 
         for (let index = 0; index < points.length; index++) {
-            const weight = getWeight(i, j, index);
+            const weight = getWeight(i, j, index)**2;
             const d = distance(points[index], cellCenter);
 
             if (d === 0) return points[index][2];
 
-            const w = d ** -(exponent + weight);
+            // console.log(d, weight);
+
+            const w = (d + weight) ** -(exponent /* + weight */);
             top += points[index][2] * w;
             bot += w;
         }
@@ -143,7 +151,15 @@ function IDW(points, cellSize, options = {}) {
         const route = way(p1Lat, p1Long, p2Lat, p2Long);
 
 
-        let weight = 0;
+
+        let counter = 0;
+
+        for (let i = 0; i < route.length - 1; i++) {
+            counter += Math.abs(route[i + 1] - route[i]);
+        }
+
+
+        /* let weight = 0;
         route.forEach(c => {
             if (c !== mask.noData && route[0] !== mask.noData) {
                 const d = c - route[0];
@@ -167,8 +183,9 @@ function IDW(points, cellSize, options = {}) {
                     }
                 }
             }
-        })
-        return weight;
+        }) */
+
+        return counter;
     }
 
     function way(x1, y1, x2, y2) {

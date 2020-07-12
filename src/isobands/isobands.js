@@ -10,11 +10,11 @@ function isobands(grid, intervals) {
 
     const Bands = [], BandsValue = [];
 
-    let lower_h = -Infinity, upper_h = intervals[0];
+    let lower_h = intervals[0] - 100, upper_h = intervals[0];
     Bands.push(toLine(computeIsobands(grid.grid, lower_h, upper_h)));
     BandsValue.push("<" + intervals[0]);
 
-    for (let i = 0; i < intervals.length - 1; i++) {        
+    for (let i = 0; i < intervals.length - 1; i++) {
         lower_h = intervals[i], upper_h = intervals[i + 1];
         Bands.push(toLine(computeIsobands(grid.grid, lower_h, upper_h)));
         BandsValue.push(lower_h + "-" + upper_h);

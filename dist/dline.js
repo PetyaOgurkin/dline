@@ -280,14 +280,13 @@
 
   function IDW(points, cellSize) {
     var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+    var buffer = arguments.length > 3 ? arguments[3] : undefined;
 
     var _optionsParser = optionsParser(options, points),
         bbox = _optionsParser.bbox,
         units = _optionsParser.units,
         exponent = _optionsParser.exponent,
-        mask = _optionsParser.mask,
-        lowerIntervals = _optionsParser.lowerIntervals,
-        upperIntervals = _optionsParser.upperIntervals;
+        mask = _optionsParser.mask;
 
     var _cellSizes = cellSizes(bbox, cellSize, units[0]),
         latSize = _cellSizes.latSize,
@@ -350,9 +349,14 @@
           bot = 0;
 
       for (var index = 0; index < points.length; index++) {
-        var weight = getWeight(i, j, index);
         var d = Math.sqrt(Math.pow(cellCenter[0] - points[index][0], 2) + Math.pow(cellCenter[1] - points[index][1], 2));
+
+        if (buffer) {
+          if (d > buffer) continue;
+        }
+
         if (d === 0) return points[index][2];
+        var weight = getWeight(i, j, index);
         var w = Math.pow(d, -(exponent + weight));
         top += points[index][2] * w;
         bot += w;
@@ -383,10 +387,13 @@
           bot = 0;
 
       for (var index = 0; index < points.length; index++) {
-        var weight = getWeight(i, j, index);
+        var weight = Math.pow(getWeight(i, j, index), 2);
         var d = distance(points[index], cellCenter);
-        if (d === 0) return points[index][2];
-        var w = Math.pow(d, -(exponent + weight));
+        if (d === 0) return points[index][2]; // console.log(d, weight);
+
+        var w = Math.pow(d + weight, -exponent
+        /* + weight */
+        );
         top += points[index][2] * w;
         bot += w;
       }
@@ -422,33 +429,39 @@
       var p2Long = Math.floor(Math.abs(mask.bbox[0] - (j * longCellSize + bbox[0])) / mask.longCellSize);
       var p2Lat = Math.floor(Math.abs(mask.bbox[1] - (i * latCellSize + bbox[1])) / mask.latCellSize);
       var route = way(p1Lat, p1Long, p2Lat, p2Long);
-      var weight = 0;
-      route.forEach(function (c) {
-        if (c !== mask.noData && route[0] !== mask.noData) {
-          var d = c - route[0];
+      var counter = 0;
 
-          if (d > 0) {
-            if (upperIntervals) {
-              for (var _i = 1; _i < upperIntervals.length; _i++) {
-                if (d >= upperIntervals[_i][0] && d < upperIntervals[_i - 1][0]) {
-                  weight += upperIntervals[_i][1];
-                  break;
-                }
+      for (var _i = 0; _i < route.length - 1; _i++) {
+        counter += Math.abs(route[_i + 1] - route[_i]);
+      }
+      /* let weight = 0;
+      route.forEach(c => {
+          if (c !== mask.noData && route[0] !== mask.noData) {
+              const d = c - route[0];
+              if (d > 0) {
+                  if (upperIntervals) {
+                      for (let i = 1; i < upperIntervals.length; i++) {
+                          if (d >= upperIntervals[i][0] && d < upperIntervals[i - 1][0]) {
+                              weight += upperIntervals[i][1];
+                              break;
+                          }
+                      }
+                  }
+              } else if (d < 0) {
+                  if (lowerIntervals) {
+                      for (let i = 1; i < lowerIntervals.length; i++) {
+                          if (d > lowerIntervals[i][0] && d <= lowerIntervals[i - 1][0]) {
+                              weight += lowerIntervals[i - 1][1];
+                              break;
+                          }
+                      }
+                  }
               }
-            }
-          } else if (d < 0) {
-            if (lowerIntervals) {
-              for (var _i2 = 1; _i2 < lowerIntervals.length; _i2++) {
-                if (d > lowerIntervals[_i2][0] && d <= lowerIntervals[_i2 - 1][0]) {
-                  weight += lowerIntervals[_i2 - 1][1];
-                  break;
-                }
-              }
-            }
           }
-        }
-      });
-      return weight;
+      }) */
+
+
+      return counter;
     }
 
     function way(x1, y1, x2, y2) {
@@ -720,21 +733,26 @@
     };
     /* values of vertexes */
 
+    /*     const A = (x, y) => { if (Number.isNaN(grid[x + 1][y])) { return low; } else return grid[x + 1][y]; }
+        const B = (x, y) => { if (Number.isNaN(grid[x + 1][y + 1])) { return low; } else return grid[x + 1][y + 1]; }
+        const C = (x, y) => { if (Number.isNaN(grid[x][y + 1])) { return low; } else return grid[x][y + 1]; }
+        const D = (x, y) => { if (Number.isNaN(grid[x][y])) { return low; } else return grid[x][y]; } */
+
 
     var A = function A(x, y) {
-      return grid[x + 1][y];
+      return grid[x + 1][y] || low;
     };
 
     var B = function B(x, y) {
-      return grid[x + 1][y + 1];
+      return grid[x + 1][y + 1] || low;
     };
 
     var C = function C(x, y) {
-      return grid[x][y + 1];
+      return grid[x][y + 1] || low;
     };
 
     var D = function D(x, y) {
-      return grid[x][y];
+      return grid[x][y] || low;
     };
     /* coordinates of points on edges */
 
@@ -1438,7 +1456,7 @@
     };
     var Bands = [],
         BandsValue = [];
-    var lower_h = -Infinity,
+    var lower_h = intervals[0] - 100,
         upper_h = intervals[0];
     Bands.push(toLine(computeIsobands(grid.grid, lower_h, upper_h)));
     BandsValue.push("<" + intervals[0]);
