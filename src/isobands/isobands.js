@@ -1,8 +1,12 @@
 import toLine from '../common/toLine';
 import compareBands from './compareBands';
 import computeIsobands from './computeIsobands';
+import * as martinez from 'martinez-polygon-clipping';
+import turf from '@turf'
 
-function isobands(grid, intervals) {
+function isobands(grid, intervals, cutMask) {
+
+
     const GeoJson = {
         "type": "FeatureCollection",
         "features": []
@@ -37,19 +41,49 @@ function isobands(grid, intervals) {
         }
     }
 
-    for (let i = 0; i < newBands.length; i++) {
+    if (cutMask) {
+        for (let i = 0; i < newBands.length; i++) {
 
-        GeoJson.features.push({
-            "type": "Feature",
-            "properties": {
-                "value": BandsValue[i]
-            },
-            "geometry": {
-                "type": "MultiPolygon",
-                "coordinates": compareBands(newBands[i])
+            const tmpBands = compareBands(newBands[i]);
+
+            if (tmpBands.length) {
+
+                const geom = martinez.intersection(cutMask.geometry.coordinates, tmpBands) || [];
+
+                GeoJson.features.push({
+                    "type": "Feature",
+                    "properties": {
+                        "value": BandsValue[i]
+                    },
+                    "geometry": {
+                        "type": "MultiPolygon",
+                        "coordinates": geom
+                    }
+                })
             }
+        }
+
+
+        GeoJson.features.forEach(f => {
+            f.properties.area = turf.area(f)
         })
+
+    } else {
+        for (let i = 0; i < newBands.length; i++) {
+
+            GeoJson.features.push({
+                "type": "Feature",
+                "properties": {
+                    "value": BandsValue[i]
+                },
+                "geometry": {
+                    "type": "MultiPolygon",
+                    "coordinates": compareBands(newBands[i])
+                }
+            })
+        }
     }
+
 
     return GeoJson;
 }

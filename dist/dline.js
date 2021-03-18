@@ -1,10 +1,14 @@
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
-  typeof define === 'function' && define.amd ? define(['exports'], factory) :
-  (global = global || self, factory(global.dline = {}));
-}(this, (function (exports) { 'use strict';
+  typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('martinez-polygon-clipping'), require('@turf')) :
+  typeof define === 'function' && define.amd ? define(['exports', 'martinez-polygon-clipping', '@turf'], factory) :
+  (global = global || self, factory(global.dline = {}, global.martinez, global.turf));
+}(this, (function (exports, martinez, turf) { 'use strict';
+
+  turf = turf && Object.prototype.hasOwnProperty.call(turf, 'default') ? turf['default'] : turf;
 
   function _typeof(obj) {
+    "@babel/helpers - typeof";
+
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
       _typeof = function (obj) {
         return typeof obj;
@@ -19,23 +23,36 @@
   }
 
   function _toConsumableArray(arr) {
-    return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread();
+    return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
   }
 
   function _arrayWithoutHoles(arr) {
-    if (Array.isArray(arr)) {
-      for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) arr2[i] = arr[i];
-
-      return arr2;
-    }
+    if (Array.isArray(arr)) return _arrayLikeToArray(arr);
   }
 
   function _iterableToArray(iter) {
-    if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter);
+    if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter);
+  }
+
+  function _unsupportedIterableToArray(o, minLen) {
+    if (!o) return;
+    if (typeof o === "string") return _arrayLikeToArray(o, minLen);
+    var n = Object.prototype.toString.call(o).slice(8, -1);
+    if (n === "Object" && o.constructor) n = o.constructor.name;
+    if (n === "Map" || n === "Set") return Array.from(o);
+    if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen);
+  }
+
+  function _arrayLikeToArray(arr, len) {
+    if (len == null || len > arr.length) len = arr.length;
+
+    for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i];
+
+    return arr2;
   }
 
   function _nonIterableSpread() {
-    throw new TypeError("Invalid attempt to spread non-iterable instance");
+    throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
   }
 
   function distance(D1, D2) {
@@ -732,11 +749,6 @@
       return p1 > c ? (c - p2) / (p1 - p2) : (c - p1) / (p2 - p1);
     };
     /* values of vertexes */
-
-    /*     const A = (x, y) => { if (Number.isNaN(grid[x + 1][y])) { return low; } else return grid[x + 1][y]; }
-        const B = (x, y) => { if (Number.isNaN(grid[x + 1][y + 1])) { return low; } else return grid[x + 1][y + 1]; }
-        const C = (x, y) => { if (Number.isNaN(grid[x][y + 1])) { return low; } else return grid[x][y + 1]; }
-        const D = (x, y) => { if (Number.isNaN(grid[x][y])) { return low; } else return grid[x][y]; } */
 
 
     var A = function A(x, y) {
@@ -1449,7 +1461,7 @@
     return isobands;
   }
 
-  function isobands(grid, intervals) {
+  function isobands(grid, intervals, cutMask) {
     var GeoJson = {
       "type": "FeatureCollection",
       "features": []
@@ -1484,17 +1496,41 @@
       }
     }
 
-    for (var _i2 = 0; _i2 < newBands.length; _i2++) {
-      GeoJson.features.push({
-        "type": "Feature",
-        "properties": {
-          "value": BandsValue[_i2]
-        },
-        "geometry": {
-          "type": "MultiPolygon",
-          "coordinates": compareBands(newBands[_i2])
+    if (cutMask) {
+      for (var _i2 = 0; _i2 < newBands.length; _i2++) {
+        var tmpBands = compareBands(newBands[_i2]);
+
+        if (tmpBands.length) {
+          var geom = martinez.intersection(cutMask.geometry.coordinates, tmpBands) || [];
+          GeoJson.features.push({
+            "type": "Feature",
+            "properties": {
+              "value": BandsValue[_i2]
+            },
+            "geometry": {
+              "type": "MultiPolygon",
+              "coordinates": geom
+            }
+          });
         }
+      }
+
+      GeoJson.features.forEach(function (f) {
+        f.properties.area = turf.area(f);
       });
+    } else {
+      for (var _i3 = 0; _i3 < newBands.length; _i3++) {
+        GeoJson.features.push({
+          "type": "Feature",
+          "properties": {
+            "value": BandsValue[_i3]
+          },
+          "geometry": {
+            "type": "MultiPolygon",
+            "coordinates": compareBands(newBands[_i3])
+          }
+        });
+      }
     }
 
     return GeoJson;

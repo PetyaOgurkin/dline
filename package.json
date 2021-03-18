@@ -16,11 +16,16 @@
   "author": "PetyaOgurkin",
   "license": "MIT",
   "devDependencies": {
-    "@babel/core": "^7.7.7",
-    "@babel/preset-env": "^7.7.7",
-    "leaflet": "^1.6.0",
-    "rollup": "^1.27.14",
-    "rollup-plugin-babel": "^4.3.3",
+    "@babel/core": "^7.13.10",
+    "@babel/preset-env": "^7.13.10",
+    "leaflet": "^1.7.1",
+    "rollup": "^1.32.1",
+    "rollup-plugin-babel": "^4.4.0",
     "rollup-plugin-babel-minify": "^9.1.1"
+  },
+  "dependencies": {
+    "@turf/turf": "^6.3.0",
+    "martinez-polygon-clipping": "^0.7.0",
+    "simplify-js": "^1.2.4"
   }
 }
