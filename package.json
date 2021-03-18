@@ -1,6 +1,6 @@
 {
   "name": "dline",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "main": "dist/dline.js",
   "scripts": {
     "dev": "rollup -c --watch",
