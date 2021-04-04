@@ -7,7 +7,7 @@ JavaScript library for  interpolating and generating contours
 ```
  or CDN to include **dline** in browser
 ```
- <script src="https://unpkg.com/dline@1.0.5/dist/dline.min.js"></script>
+ <script src="https://unpkg.com/dline@1.0.6/dist/dline.min.js"></script>
 ```
 ## Documentation
 ### Converters

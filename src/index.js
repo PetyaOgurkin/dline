@@ -5,3 +5,5 @@ export { pointsToArray } from './common/pointsToArray';
 export { pointsToGeoJson } from './common/pointsToGeoJson';
 export { isobands } from './isobands/isobands';
 export { isolines } from './isolines/isolines';
+export { voronoi } from './common/voronoi';
+export { getTotalLevel } from './common/getTotalLevel';

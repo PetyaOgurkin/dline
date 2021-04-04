@@ -1,6 +1,6 @@
 {
   "name": "dline",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "main": "dist/dline.js",
   "scripts": {
     "dev": "rollup -c --watch",
@@ -16,8 +16,8 @@
   "author": "PetyaOgurkin",
   "license": "MIT",
   "devDependencies": {
-    "@babel/core": "^7.13.10",
-    "@babel/preset-env": "^7.13.10",
+    "@babel/core": "^7.13.14",
+    "@babel/preset-env": "^7.13.12",
     "leaflet": "^1.7.1",
     "rollup": "^1.32.1",
     "rollup-plugin-babel": "^4.4.0",

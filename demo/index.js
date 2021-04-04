@@ -1725,7 +1725,10 @@ L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_toke
  */
 
 
-async function voronoi() {
+
+function voronoi() {
+
+
     map.eachLayer(layer => {
         if (layer.options.type === "band") {
             map.removeLayer(layer)
@@ -1739,25 +1742,11 @@ async function voronoi() {
         points.push([rand(55.8, 56.2), rand(92.25, 93.4), rand(0, 0.32)])
     }
 
+    const voronoi = dline.voronoi(points, [92.25, 55.8, 93.4, 56.2], borderS)
+    const totalLevel = dline.getTotalLevel(voronoi)
 
-    const geoPoints = dline.pointsToGeoJson(points)
+    console.log(voronoi, totalLevel);
 
-    const voronoi = {
-        type: 'FeatureCollection',
-        features: turf.voronoi(geoPoints, { bbox: [92.25, 55.8, 93.4, 56.2] }).features.filter(v => {
-            v.properties.value = turf.pointsWithinPolygon(geoPoints, v).features[0].properties.value
-
-            const geom = martinez.intersection(borderS.geometry.coordinates, v.geometry.coordinates)
-
-            if (geom) {
-                v.geometry.type = 'MultiPolygon'
-                v.geometry.coordinates = geom
-                v.properties.area = turf.area(v)
-                return true
-            }
-            return false
-        })
-    }
 
     voronoi.features.forEach(feature => {
         L.geoJSON(feature, { color: 'black', weight: 0, fillOpacity: 0.7, type: "band" }).bindPopup(feature.properties.value.toString() + ' /' + feature.properties.area.toString()).addTo(map);

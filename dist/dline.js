@@ -1804,13 +1804,47 @@
     return GeoJson;
   }
 
+  var voronoi = function voronoi(points, bbox, cutMask) {
+    var geoPoints = pointsToGeoJson(points);
+    return {
+      type: 'FeatureCollection',
+      features: turf.voronoi(geoPoints, {
+        bbox: bbox
+      }).features.filter(function (v) {
+        v.properties.value = turf.pointsWithinPolygon(geoPoints, v).features[0].properties.value;
+        var geom = martinez.intersection(cutMask.geometry.coordinates, v.geometry.coordinates);
+
+        if (geom) {
+          v.geometry.type = 'MultiPolygon';
+          v.geometry.coordinates = geom;
+          v.properties.area = turf.area(v);
+          return true;
+        }
+
+        return false;
+      })
+    };
+  };
+
+  var getTotalLevel = function getTotalLevel(geoJson) {
+    var up = 0;
+    var down = 0;
+    geoJson.features.forEach(function (p) {
+      up += p.properties.area * p.properties.value;
+      down += p.properties.area;
+    });
+    return up / down;
+  };
+
   exports.IDW = IDW;
   exports.ascToArray = ascToArray;
+  exports.getTotalLevel = getTotalLevel;
   exports.isobands = isobands;
   exports.isolines = isolines;
   exports.pointGridToArray = pointGridToArray;
   exports.pointsToArray = pointsToArray;
   exports.pointsToGeoJson = pointsToGeoJson;
+  exports.voronoi = voronoi;
 
   Object.defineProperty(exports, '__esModule', { value: true });
 
