@@ -22,6 +22,21 @@
     return _typeof(obj);
   }
 
+  function _defineProperty(obj, key, value) {
+    if (key in obj) {
+      Object.defineProperty(obj, key, {
+        value: value,
+        enumerable: true,
+        configurable: true,
+        writable: true
+      });
+    } else {
+      obj[key] = value;
+    }
+
+    return obj;
+  }
+
   function _toConsumableArray(arr) {
     return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread();
   }
@@ -647,6 +662,25 @@
     return geoJson.features.map(function (p) {
       return [].concat(_toConsumableArray(p.geometry.coordinates.reverse()), [p.properties[[z]]]);
     });
+  };
+
+  var pointsToGeoJson = function pointsToGeoJson(points) {
+    var z = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'value';
+    var features = points.map(function (p) {
+      return {
+        type: 'Feature',
+        properties: _defineProperty({}, z, p[2]),
+        geometry: {
+          type: 'Point',
+          coordinates: [p[1], p[0]]
+        }
+      };
+    });
+    var geoJson = {
+      type: 'FeatureCollection',
+      features: features
+    };
+    return geoJson;
   };
 
   /* из пар точек делает последовательность */
@@ -1776,6 +1810,7 @@
   exports.isolines = isolines;
   exports.pointGridToArray = pointGridToArray;
   exports.pointsToArray = pointsToArray;
+  exports.pointsToGeoJson = pointsToGeoJson;
 
   Object.defineProperty(exports, '__esModule', { value: true });
 

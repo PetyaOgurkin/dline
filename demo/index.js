@@ -1698,9 +1698,17 @@ const ppol = {
 
 
 
+map = L.map('map').setView([56, 93], 11);
 
+L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+    maxZoom: 18,
+    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+        '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+        'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+    id: 'mapbox/streets-v11'
+}).addTo(map);
 
-const map = new ol.Map({
+/* const map = new ol.Map({
     target: 'map',
     layers: [
         new ol.layer.Tile({
@@ -1714,6 +1722,51 @@ const map = new ol.Map({
         zoom: 12
     })
 });
+ */
+
+
+async function voronoi() {
+    map.eachLayer(layer => {
+        if (layer.options.type === "band") {
+            map.removeLayer(layer)
+        }
+    })
+
+    const rand = (min, max) => Math.random() * (max - min) + min;
+
+    const points = [];
+    for (let i = 0; i < 50; i++) {
+        points.push([rand(55.8, 56.2), rand(92.25, 93.4), rand(0, 0.32)])
+    }
+
+
+    const geoPoints = dline.pointsToGeoJson(points)
+
+
+    console.time('asd')
+    const voronoi = {
+        type: 'FeatureCollection',
+        features: turf.voronoi(geoPoints, { bbox: [92.25, 55.8, 93.4, 56.2] }).features.filter(v => {
+            v.properties.value = turf.pointsWithinPolygon(geoPoints, v).features[0].properties.value
+
+            const geom = martinez.intersection(borderS.geometry.coordinates, v.geometry.coordinates)
+
+            if (geom) {
+                v.geometry.type = 'MultiPolygon'
+                v.geometry.coordinates = geom
+                v.properties.area = turf.area(v)
+                return true
+            }
+            return false
+        })
+    }
+    console.timeEnd('asd')
+
+    voronoi.features.forEach(feature => {
+        L.geoJSON(feature, { color: 'black', weight: 0, fillOpacity: 0.7, type: "band" }).bindPopup(feature.properties.value.toString() + ' /' + feature.properties.area.toString()).addTo(map);
+    });
+
+}
 
 
 async function go() {
