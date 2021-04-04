@@ -1742,8 +1742,6 @@ async function voronoi() {
 
     const geoPoints = dline.pointsToGeoJson(points)
 
-
-    console.time('asd')
     const voronoi = {
         type: 'FeatureCollection',
         features: turf.voronoi(geoPoints, { bbox: [92.25, 55.8, 93.4, 56.2] }).features.filter(v => {
@@ -1760,7 +1758,6 @@ async function voronoi() {
             return false
         })
     }
-    console.timeEnd('asd')
 
     voronoi.features.forEach(feature => {
         L.geoJSON(feature, { color: 'black', weight: 0, fillOpacity: 0.7, type: "band" }).bindPopup(feature.properties.value.toString() + ' /' + feature.properties.area.toString()).addTo(map);
